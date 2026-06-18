@@ -23,6 +23,13 @@ export function FeedTabBar({
       <button type="button" onClick={() => onChange("feed")} className={tabClass(active === "feed")}>
         📰 {t("feed.tabFeed")}
       </button>
+      <button
+        type="button"
+        onClick={() => onChange("following")}
+        className={tabClass(active === "following")}
+      >
+        👥 {t("feed.tabFollowing")}
+      </button>
       <button type="button" onClick={() => onChange("map")} className={tabClass(active === "map")}>
         🗺️ {t("feed.tabMap")}
       </button>

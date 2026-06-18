@@ -26,6 +26,8 @@ export const en: Messages = {
     deleteGossip: "Delete gossip",
     blockUser: "Block",
     blockedUser: "User blocked.",
+    followUser: "Follow",
+    unfollowUser: "Unfollow",
     blockConfirm: "Block @{{username}}? All their posts will be hidden for you (this is not a report). Continue?",
     legalPrivacy: "Privacy",
     legalTerms: "Terms",
@@ -106,7 +108,11 @@ export const en: Messages = {
   feed: {
     subtitle: "Wall · Nearby gossip",
     tabFeed: "Gossip feed",
+    tabFollowing: "Following",
     tabMap: "Gossip map",
+    followingGossipsTitle: "Gossip from people you follow",
+    followingEmptyHint: "You're not following anyone yet. Use ⋯ on a gossip card to follow.",
+    followingNoPosts: "No new gossip from people you follow yet.",
     nearbyGossips: "Nearby gossip",
     cityGossips: "{{city}} gossip",
     noGossipsInRadius:
@@ -257,6 +263,9 @@ export const en: Messages = {
     serverNotConfigured: "Report system is not configured. Try again later.",
     alreadyReported: "You already reported this post.",
     selfReport: "You can't report your own post.",
+  },
+  follow: {
+    failed: "Couldn't update follow.",
   },
   account: {
     delete: "Delete account permanently",

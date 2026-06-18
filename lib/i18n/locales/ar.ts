@@ -26,6 +26,8 @@ export const ar: Messages = {
     deleteGossip: "حذف النميمة",
     blockUser: "حظر",
     blockedUser: "تم حظر المستخدم.",
+    followUser: "متابعة",
+    unfollowUser: "إلغاء المتابعة",
     blockConfirm: "حظر @{{username}}؟ ستُخفى جميع منشوراته لديك (هذا ليس بلاغًا). متابعة؟",
     legalPrivacy: "الخصوصية",
     legalTerms: "الشروط",
@@ -106,7 +108,11 @@ export const ar: Messages = {
   feed: {
     subtitle: "الجدار · نميمة قريبة",
     tabFeed: "خلاصة النميمة",
+    tabFollowing: "متابَعين",
     tabMap: "خريطة النميمة",
+    followingGossipsTitle: "نمائم من تتابعهم",
+    followingEmptyHint: "لا تتابع أحداً بعد. استخدم ⋯ على بطاقة النميمة للمتابعة.",
+    followingNoPosts: "لا توجد نمائم جديدة من من تتابعهم.",
     nearbyGossips: "نميمة قريبة",
     cityGossips: "نميمة {{city}}",
     noGossipsInRadius:
@@ -257,6 +263,9 @@ export const ar: Messages = {
     serverNotConfigured: "نظام البلاغات غير مُعد. حاول لاحقاً.",
     alreadyReported: "أبلغت عن هذا المنشور مسبقاً.",
     selfReport: "لا يمكنك الإبلاغ عن منشورك.",
+  },
+  follow: {
+    failed: "تعذّر تحديث المتابعة.",
   },
   account: {
     delete: "حذف الحساب نهائياً",

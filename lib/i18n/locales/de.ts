@@ -26,6 +26,8 @@ export const de: Messages = {
     deleteGossip: "Klatsch löschen",
     blockUser: "Blockieren",
     blockedUser: "Nutzer blockiert.",
+    followUser: "Folgen",
+    unfollowUser: "Entfolgen",
     blockConfirm: "@{{username}} blockieren? Alle Beiträge werden für dich ausgeblendet (kein Meldung). Fortfahren?",
     legalPrivacy: "Datenschutz",
     legalTerms: "AGB",
@@ -106,7 +108,11 @@ export const de: Messages = {
   feed: {
     subtitle: "Wand · Klatsch in der Nähe",
     tabFeed: "Klatsch-Feed",
+    tabFollowing: "Folge ich",
     tabMap: "Klatsch-Karte",
+    followingGossipsTitle: "Klatsch von Leuten, denen du folgst",
+    followingEmptyHint: "Du folgst noch niemandem. Über ⋯ auf einer Karte folgen.",
+    followingNoPosts: "Noch kein neuer Klatsch von deinen Follows.",
     nearbyGossips: "Klatsch in der Nähe",
     cityGossips: "{{city}} Klatsch",
     noGossipsInRadius:
@@ -257,6 +263,9 @@ export const de: Messages = {
     serverNotConfigured: "Meldungssystem nicht konfiguriert. Bitte später erneut versuchen.",
     alreadyReported: "Diesen Beitrag hast du bereits gemeldet.",
     selfReport: "Eigene Beiträge können nicht gemeldet werden.",
+  },
+  follow: {
+    failed: "Folgen fehlgeschlagen.",
   },
   account: {
     delete: "Account dauerhaft löschen",

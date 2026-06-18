@@ -24,6 +24,8 @@ export function GiybetCard({
   onBlockUser,
   onDeleteGossip,
   onTagClick,
+  followingAuthors,
+  onToggleFollow,
 }: {
   post: FeedPost;
   currentUserId?: string;
@@ -39,6 +41,8 @@ export function GiybetCard({
   onBlockUser?: (author: string) => void;
   onDeleteGossip?: (postId: number) => void;
   onTagClick?: (tag: string) => void;
+  followingAuthors?: Set<string>;
+  onToggleFollow?: (author: string) => void;
 }) {
   const { t } = useI18n();
   const [showComments, setShowComments] = useState(false);
@@ -47,6 +51,7 @@ export function GiybetCard({
   const isOwner =
     (currentUserId && post.ownerUserId === currentUserId) ||
     post.author === currentNickname.trim();
+  const isFollowing = followingAuthors?.has(post.author.trim()) ?? false;
 
   const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +97,7 @@ export function GiybetCard({
             🚨
           </button>
         )}
-        {!isOwner && onBlockUser && (
+        {!isOwner && (onBlockUser || onToggleFollow) && (
           <div className="relative">
             <button
               type="button"
@@ -111,17 +116,31 @@ export function GiybetCard({
                   aria-label={t("common.close")}
                   onClick={() => setShowActionsMenu(false)}
                 />
-                <div className="absolute right-0 top-8 z-[2] min-w-[9rem] rounded-xl border border-zinc-700 bg-[#12121a] py-1 shadow-lg">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowActionsMenu(false);
-                      onBlockUser(post.author);
-                    }}
-                    className="block w-full px-3 py-2 text-left text-xs text-orange-300 hover:bg-zinc-900/80"
-                  >
-                    🚫 {t("common.blockUser")}
-                  </button>
+                <div className="absolute right-0 top-8 z-[2] min-w-[10rem] rounded-xl border border-zinc-700 bg-[#12121a] py-1 shadow-lg">
+                  {onToggleFollow && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowActionsMenu(false);
+                        onToggleFollow(post.author);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-xs text-sky-300 hover:bg-zinc-900/80"
+                    >
+                      {isFollowing ? `✓ ${t("common.unfollowUser")}` : `👤 ${t("common.followUser")}`}
+                    </button>
+                  )}
+                  {onBlockUser && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowActionsMenu(false);
+                        onBlockUser(post.author);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-xs text-orange-300 hover:bg-zinc-900/80"
+                    >
+                      🚫 {t("common.blockUser")}
+                    </button>
+                  )}
                 </div>
               </>
             )}

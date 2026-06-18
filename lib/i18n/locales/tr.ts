@@ -28,6 +28,8 @@ export const tr: Messages = {
     deleteGossip: "Gıybeti sil",
     blockUser: "Engelle",
     blockedUser: "Kullanıcı engellendi.",
+    followUser: "Takip et",
+    unfollowUser: "Takibi bırak",
     blockConfirm: "@{{username}} engellenecek. Bu kişinin tüm paylaşımları sende gizlenir (şikayet değil). Emin misin?",
     legalPrivacy: "Gizlilik",
     legalTerms: "Koşullar",
@@ -108,7 +110,11 @@ export const tr: Messages = {
   feed: {
     subtitle: "Duvar · Yakınındaki gıybetler",
     tabFeed: "Gıybet Akışı",
+    tabFollowing: "Takip Ettiklerim",
     tabMap: "Gıybet Haritası",
+    followingGossipsTitle: "Takip ettiklerinin gıybetleri",
+    followingEmptyHint: "Henüz kimseyi takip etmiyorsun. Gıybet kartlarındaki ⋯ menüsünden takip edebilirsin.",
+    followingNoPosts: "Takip ettiklerinin henüz yeni gıybeti yok.",
     nearbyGossips: "Yakındaki Gıybetler",
     cityGossips: "{{city}} Gıybetleri",
     noGossipsInRadius:
@@ -260,6 +266,9 @@ export const tr: Messages = {
     serverNotConfigured: "Şikayet sistemi yapılandırılmamış. Daha sonra tekrar dene.",
     alreadyReported: "Bu gönderiyi zaten şikayet ettin.",
     selfReport: "Kendi gönderini şikayet edemezsin.",
+  },
+  follow: {
+    failed: "Takip işlemi başarısız.",
   },
   account: {
     delete: "Hesabı kalıcı sil",

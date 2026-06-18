@@ -29,6 +29,8 @@ export function FeedPostsSection({ feed }: { feed: FeedState }) {
     openGossipChat,
     handleOpenReport,
     handleBlockUser,
+    followingAuthors,
+    handleToggleFollow,
   } = feed;
 
   return (
@@ -74,6 +76,8 @@ export function FeedPostsSection({ feed }: { feed: FeedState }) {
                 onBlockUser={handleBlockUser}
                 onDeleteGossip={onDeleteGossip}
                 onTagClick={setActiveTagFilter}
+                followingAuthors={followingAuthors}
+                onToggleFollow={handleToggleFollow}
               />
             ))
           )}

@@ -8,6 +8,7 @@ import { postHasTag, computeTrendingTags } from "@/lib/feed/tags";
 import { resolvePostDistanceMeters } from "@/lib/geo";
 import type { AvatarCreatorConfig, FeedViewTab } from "@/lib/giybet/types";
 import { useBlockedAuthors } from "@/hooks/feed/useBlockedAuthors";
+import { useFollowAuthors } from "@/hooks/feed/useFollowAuthors";
 import { useFeedGeo } from "@/hooks/feed/useFeedGeo";
 import { useFeedNotifications } from "@/hooks/feed/useFeedNotifications";
 import { useGossipChat } from "@/hooks/feed/useGossipChat";
@@ -54,6 +55,11 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   }, []);
 
   const { blockedAuthors, blockAuthor } = useBlockedAuthors(userId);
+  const {
+    followingAuthors,
+    followCounts,
+    toggleFollowAuthor,
+  } = useFollowAuthors(userId, nickname);
 
   const geo = useFeedGeo({
     nominatimLanguage,
@@ -118,6 +124,16 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     }
   };
 
+  const handleToggleFollow = async (author: string) => {
+    const trimmed = author.trim();
+    if (!trimmed || trimmed === nickname.trim()) return;
+    const ok = await toggleFollowAuthor(trimmed);
+    if (!ok) {
+      gossipChat.setGossipChatError(t("follow.failed"));
+      window.setTimeout(() => gossipChat.setGossipChatError(""), 2500);
+    }
+  };
+
   const selectedMapPost = useMemo(
     () =>
       map.selectedMapPin
@@ -134,8 +150,8 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     () => userPosts.reduce((sum, p) => sum + sumPostReactions(p.reactions), 0),
     [userPosts],
   );
-  const profileFollowers = 142;
-  const profileFollowing = 98;
+  const profileFollowers = followCounts.followers;
+  const profileFollowing = followCounts.following;
 
   const likersModalPost = posts.find((p) => p.id === likersModalPostId);
 
@@ -152,6 +168,16 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     }
     return list;
   }, [posts, blockedAuthors, geo.geoCoords, activeTagFilter, radarRadiusMeters]);
+
+  const followingFilteredPosts = useMemo(() => {
+    let list = posts.filter(
+      (p) => followingAuthors.has(p.author.trim()) && !blockedAuthors.has(p.author.trim()),
+    );
+    if (activeTagFilter) {
+      list = list.filter((p) => postHasTag(p, activeTagFilter));
+    }
+    return list;
+  }, [posts, followingAuthors, blockedAuthors, activeTagFilter]);
 
   const trendingTags = useMemo(() => computeTrendingTags(posts, 5), [posts]);
 
@@ -237,6 +263,8 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     profileFollowing,
     likersModalPost,
     filteredPosts,
+    followingFilteredPosts,
+    followingAuthors,
     trendingTags,
     mapDisplayPins: map.mapDisplayPins,
     pinsInMapViewport: map.pinsInMapViewport,
@@ -248,6 +276,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     handleShareAtSelectedPlace: map.handleShareAtSelectedPlace,
     handleOpenReport: report.handleOpenReport,
     handleBlockUser,
+    handleToggleFollow,
     handleSubmitReport: report.handleSubmitReport,
     handleBellToggle: notifications.handleBellToggle,
     openGossipChat: gossipChat.openGossipChat,

@@ -239,4 +239,4 @@ export type GossipChatMessageRow = {
   content: string;
   created_at?: string;
 };
-export type FeedViewTab = "feed" | "map";
+export type FeedViewTab = "feed" | "following" | "map";

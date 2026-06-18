@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { ActiveGossipChatTabsPanel } from "@/components/chat/ActiveGossipChatTabsPanel";
 import { FeedPostsSection } from "@/components/feed/FeedPostsSection";
+import { FollowingPostsSection } from "@/components/feed/FollowingPostsSection";
 import { FeedTabBar } from "@/components/feed/FeedTabBar";
 import { GiybetFeedModals } from "@/components/feed/GiybetFeedModals";
 import { GiybetRadar } from "@/components/feed/GiybetRadar";
@@ -72,7 +73,7 @@ export default function GiybetFeed(props: GiybetFeedProps) {
 
       <ProfileBar nickname={nickname} avatar={avatar} />
 
-      {feedTab !== "map" && (
+      {feedTab === "feed" && (
         <GiybetRadar
           radiusMeters={radarRadiusMeters}
           onChange={setRadarRadiusMeters}
@@ -92,6 +93,8 @@ export default function GiybetFeed(props: GiybetFeedProps) {
 
       {feedTab === "map" ? (
         <MapTabContent feed={feed} />
+      ) : feedTab === "following" ? (
+        <FollowingPostsSection feed={feed} />
       ) : (
         <div className="flex flex-col gap-5">
           <ShareComposer feed={feed} />
