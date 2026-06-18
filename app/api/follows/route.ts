@@ -18,9 +18,34 @@ function followGossipId(userId: string): string {
   return `follow-${userId}`;
 }
 
-/** Herkese açık takip sayıları */
+/** Takip listesi veya herkese açık takip sayıları */
 export async function GET(request: NextRequest) {
-  const username = request.nextUrl.searchParams.get("username")?.trim() ?? "";
+  const { searchParams } = request.nextUrl;
+
+  if (searchParams.get("following") === "1") {
+    const user = await getSessionUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
+    const admin = getAdminClient();
+    if (!admin) {
+      return NextResponse.json({ following: [] });
+    }
+
+    const { data } = await admin
+      .from("user_follows")
+      .select("followed_username")
+      .eq("follower_user_id", user.id);
+
+    const following = (data ?? [])
+      .map((row) => (row as { followed_username: string }).followed_username?.trim())
+      .filter(Boolean);
+
+    return NextResponse.json({ following });
+  }
+
+  const username = searchParams.get("username")?.trim() ?? "";
   if (!isValidUsername(username)) {
     return NextResponse.json({ error: "invalid_username" }, { status: 400 });
   }

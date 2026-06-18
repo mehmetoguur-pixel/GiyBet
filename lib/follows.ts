@@ -48,15 +48,21 @@ export async function unfollowUsername(followedUsername: string): Promise<string
   return body.error ?? "failed";
 }
 
-export async function fetchFollowingUsernames(userId: string): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("user_follows")
-    .select("followed_username")
-    .eq("follower_user_id", userId);
-  if (error || !data) return [];
-  return data
-    .map((row) => (row as { followed_username: string }).followed_username?.trim())
-    .filter(Boolean);
+export async function fetchFollowingUsernames(_userId: string): Promise<string[]> {
+  const token = await getAuthToken();
+  if (!token) return [];
+
+  try {
+    const res = await fetch("/api/follows?following=1", {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { following?: string[] };
+    return data.following ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchFollowCountsByUsername(
@@ -83,24 +89,7 @@ export async function fetchFollowCountsByUsername(
 
 export async function fetchFollowCounts(
   nickname: string,
-  userId: string,
+  _userId: string,
 ): Promise<{ followers: number; following: number }> {
-  const trimmed = nickname.trim();
-  if (!userId || !trimmed) return { followers: 0, following: 0 };
-
-  const [followingRes, followersRes] = await Promise.all([
-    supabase
-      .from("user_follows")
-      .select("*", { count: "exact", head: true })
-      .eq("follower_user_id", userId),
-    supabase
-      .from("user_follows")
-      .select("*", { count: "exact", head: true })
-      .eq("followed_username", trimmed),
-  ]);
-
-  return {
-    following: followingRes.count ?? 0,
-    followers: followersRes.count ?? 0,
-  };
+  return fetchFollowCountsByUsername(nickname);
 }
