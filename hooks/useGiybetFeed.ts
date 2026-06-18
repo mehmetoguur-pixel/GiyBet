@@ -328,7 +328,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     mapFollowingOnly,
     setMapFollowingOnly,
     trendingTags,
-    mapDisplayPins: map.mapDisplayPins,
+    mapEligiblePins: map.mapEligiblePins,
     pinsInMapViewport: map.pinsInMapViewport,
     mapPinsVisible: map.mapPinsVisible,
     handleSelectPlaceFromSearch: map.handleSelectPlaceFromSearch,

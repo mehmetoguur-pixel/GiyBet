@@ -19,7 +19,7 @@ export function MapTabContent({ feed }: { feed: FeedState }) {
     userCity,
     mapPinsVisible,
     pinsInMapViewport,
-    mapDisplayPins,
+    mapEligiblePins,
     nearbyPlaces,
     selectedPlace,
     setSelectedPlace,
@@ -90,7 +90,7 @@ export function MapTabContent({ feed }: { feed: FeedState }) {
       <div className="relative">
         <GiybetMap
           active={feedTab === "map"}
-          pins={mapDisplayPins}
+          pins={mapEligiblePins}
           rooms={rooms}
           nearbyPlaces={nearbyPlaces}
           selectedPlace={selectedPlace}

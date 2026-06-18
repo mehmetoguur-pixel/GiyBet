@@ -93,8 +93,19 @@ export function useMapViewport({
 
   const handleMapBoundsChange = useCallback(
     (bounds: MapBounds, zoom: number) => {
-      setMapViewportBounds(bounds);
-      setMapZoom(zoom);
+      setMapViewportBounds((prev) => {
+        if (
+          prev &&
+          prev.north === bounds.north &&
+          prev.east === bounds.east &&
+          prev.south === bounds.south &&
+          prev.west === bounds.west
+        ) {
+          return prev;
+        }
+        return bounds;
+      });
+      setMapZoom((prev) => (prev === zoom ? prev : zoom));
       if (boundsScanTimerRef.current != null) {
         window.clearTimeout(boundsScanTimerRef.current);
       }
@@ -176,7 +187,7 @@ export function useMapViewport({
       });
   }, [mapPins, blockedAuthors, followingAuthors, mapFollowingOnly]);
 
-  const mapDisplayPins = useMemo(() => {
+  const pinsInMapViewport = useMemo(() => {
     if (mapZoom < MAP_GOSSIP_PINS_MIN_ZOOM) return [];
     if (!mapViewportBounds) return mapEligiblePins;
     return mapEligiblePins.filter((pin) =>
@@ -190,8 +201,6 @@ export function useMapViewport({
       setSelectedMapPin(null);
     }
   }, [selectedMapPin, mapPins]);
-
-  const pinsInMapViewport = mapDisplayPins;
   const mapPinsVisible = mapZoom >= MAP_GOSSIP_PINS_MIN_ZOOM;
 
   const highlightRoom = useCallback((roomId: string, durationMs = 10000) => {
@@ -223,7 +232,7 @@ export function useMapViewport({
     mapShareTarget,
     setMapShareTarget,
     selectedPlaceHasRoom,
-    mapDisplayPins,
+    mapEligiblePins,
     pinsInMapViewport,
     mapPinsVisible,
     focusPlaceOnMap,

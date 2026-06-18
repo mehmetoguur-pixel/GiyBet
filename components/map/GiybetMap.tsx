@@ -67,6 +67,7 @@ export function GiybetMap({
   const onBoundsChangeRef = useRef(onBoundsChange);
   const hasInitialFitRef = useRef(false);
   const prevPinCountRef = useRef(0);
+  const hasDensePinFitRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(6);
   const showGossipPins = currentZoom >= MAP_GOSSIP_PINS_MIN_ZOOM;
@@ -98,7 +99,9 @@ export function GiybetMap({
       ],
       { padding: [48, 48], maxZoom, animate: true, duration: 0.75 },
     );
-    map.once("moveend", () => ensurePinZoom(map));
+    map.once("moveend", () => {
+      ensurePinZoom(map);
+    });
   }, [pins, ensurePinZoom]);
 
   useEffect(() => {
@@ -198,8 +201,10 @@ export function GiybetMap({
 
   useEffect(() => {
     if (!active || !mapReady || !mapRef.current) return;
+    if (hasDensePinFitRef.current) return;
     const prev = prevPinCountRef.current;
     if (pins.length > prev && pins.length >= 24 && prev < 24) {
+      hasDensePinFitRef.current = true;
       fitMapToAllPins();
     }
     prevPinCountRef.current = pins.length;
@@ -212,7 +217,7 @@ export function GiybetMap({
     const emitView = () => {
       const bounds = map.getBounds();
       const zoom = map.getZoom();
-      setCurrentZoom(zoom);
+      setCurrentZoom((prev) => (prev === zoom ? prev : zoom));
       onBoundsChangeRef.current(
         {
           north: bounds.getNorth(),
