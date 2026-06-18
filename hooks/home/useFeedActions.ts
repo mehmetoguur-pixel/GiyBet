@@ -593,7 +593,8 @@ export function useFeedActions({
     setLoadMoreLoading(true);
     try {
       const offset = feedPosts.length;
-      const { posts, pins } = await fetchGossipsPage(offset, GOSSIP_PAGE_SIZE, nickname);
+      const { posts, pins, error } = await fetchGossipsPage(offset, GOSSIP_PAGE_SIZE, nickname);
+      if (error) return;
       if (!posts.length) {
         setHasMorePosts(false);
         return;

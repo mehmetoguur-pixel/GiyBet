@@ -123,20 +123,39 @@ export async function fetchGossipsPage(
   posts: FeedPost[];
   pins: MapPin[];
   gossipIds: string[];
+  error?: string | null;
 }> {
   const locale = resolveStoredLocale() ?? detectDeviceLocale();
   const safeOffset = Math.max(0, offset);
   const safeLimit = Math.min(Math.max(1, limit), GOSSIP_FEED_LIMIT);
 
-  const { data, error } = await supabase
-    .from("gossips")
-    .select("*")
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .range(safeOffset, safeOffset + safeLimit - 1);
+  const rangeQuery = (includeDeletedFilter: boolean) => {
+    let query = supabase
+      .from("gossips")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .range(safeOffset, safeOffset + safeLimit - 1);
+    if (includeDeletedFilter) {
+      query = query.is("deleted_at", null);
+    }
+    return query;
+  };
 
-  if (error || !data?.length) {
-    return { posts: [], pins: [], gossipIds: [] };
+  let { data, error } = await rangeQuery(true);
+  if (
+    error &&
+    (error.message.includes("deleted_at") || error.message.includes("schema cache"))
+  ) {
+    ({ data, error } = await rangeQuery(false));
+  }
+
+  if (error) {
+    console.warn("Gıybets yüklenemedi:", error.message);
+    return { posts: [], pins: [], gossipIds: [], error: error.message };
+  }
+
+  if (!data?.length) {
+    return { posts: [], pins: [], gossipIds: [], error: null };
   }
 
   const posts: FeedPost[] = [];

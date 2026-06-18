@@ -3,6 +3,7 @@ import {
   mergeCommentInsert,
   mergeGossipInsert,
   mergeGossipUpdate,
+  mergeServerPostsIntoFeed,
 } from "@/lib/gossip/realtime-feed";
 import type { CommentRow, FeedPost, GossipRow } from "@/lib/giybet/types";
 
@@ -79,5 +80,22 @@ describe("realtime-feed merge", () => {
     expect(once[0].commentItems.length).toBe(1);
     const twice = mergeCommentInsert(once, row);
     expect(twice[0].commentItems.length).toBe(1);
+  });
+
+  it("keeps existing posts when merging a pagination page", () => {
+    const existing = [basePost("g1", 1), basePost("g2", 2)];
+    const nextPage = [basePost("g3", 3), basePost("g4", 4)];
+    const merged = mergeServerPostsIntoFeed(existing, nextPage);
+    expect(merged.map((p) => p.gossipId)).toEqual(["g1", "g2", "g3", "g4"]);
+  });
+
+  it("updates overlapping posts without dropping others", () => {
+    const existing = [basePost("g1", 1), basePost("g2", 2)];
+    existing[0].distanceMeters = 250;
+    const refreshed = [{ ...basePost("g1", 1), distanceMeters: undefined }];
+    const merged = mergeServerPostsIntoFeed(existing, refreshed);
+    expect(merged.length).toBe(2);
+    expect(merged[0].distanceMeters).toBe(250);
+    expect(merged[1].gossipId).toBe("g2");
   });
 });

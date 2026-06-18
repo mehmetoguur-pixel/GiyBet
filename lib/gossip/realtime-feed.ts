@@ -110,22 +110,46 @@ export function mergeGossipUpdate(
 
 /** Sunucudan gelen feed ile mevcut UI durumunu birleştir (mesafe, yorumlar) */
 export function mergeServerPostsIntoFeed(existing: FeedPost[], server: FeedPost[]): FeedPost[] {
-  const byGossip = new Map(
-    existing.map((p) => [normalizeGossipId(p.gossipId ?? ""), p]),
-  );
-  return server.map((serverPost) => {
-    const prev = byGossip.get(normalizeGossipId(serverPost.gossipId ?? ""));
-    if (!prev) return serverPost;
+  if (!server.length) return existing;
+  if (!existing.length) return server;
+
+  const mergedByGossip = new Map<string, FeedPost>();
+
+  for (const serverPost of server) {
+    const gid = normalizeGossipId(serverPost.gossipId ?? "");
+    const prev = existing.find((p) => normalizeGossipId(p.gossipId ?? "") === gid);
+    if (!prev) {
+      mergedByGossip.set(gid, serverPost);
+      continue;
+    }
     const comments =
       prev.commentItems.length >= serverPost.commentItems.length
         ? prev.commentItems
         : serverPost.commentItems;
-    return {
+    mergedByGossip.set(gid, {
       ...serverPost,
       distanceMeters: prev.distanceMeters ?? serverPost.distanceMeters,
       commentItems: comments,
-    };
-  });
+    });
+  }
+
+  const result: FeedPost[] = [];
+  const seen = new Set<string>();
+
+  for (const post of existing) {
+    const gid = normalizeGossipId(post.gossipId ?? "");
+    seen.add(gid);
+    result.push(mergedByGossip.get(gid) ?? post);
+  }
+
+  for (const serverPost of server) {
+    const gid = normalizeGossipId(serverPost.gossipId ?? "");
+    if (seen.has(gid)) continue;
+    result.push(mergedByGossip.get(gid) ?? serverPost);
+    seen.add(gid);
+  }
+
+  return result;
 }
 
 export function mergeCommentInsert(posts: FeedPost[], row: CommentRow): FeedPost[] {
