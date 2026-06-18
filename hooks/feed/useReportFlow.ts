@@ -97,6 +97,11 @@ export function useReportFlow({
           showReportError(t("errors.rateLimitHour"));
         } else if (payload.error === "server_not_configured") {
           showReportError(t("report.serverNotConfigured"));
+        } else if (
+          payload.error === "report_rls_blocked" ||
+          payload.error === "database_schema_outdated"
+        ) {
+          showReportError(t("report.serverNotConfigured"));
         } else {
           showReportError(t("report.failed"));
         }

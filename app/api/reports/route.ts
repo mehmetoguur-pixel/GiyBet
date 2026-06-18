@@ -64,15 +64,19 @@ export async function POST(request: NextRequest) {
 
   const { data: gossip, error: gossipError } = await db
     .from("gossips")
-    .select("id, username, user_id, deleted_at, content")
+    .select("id, username, user_id, content")
     .eq("id", gossipId)
     .maybeSingle();
 
   if (gossipError) {
-    return NextResponse.json({ error: gossipError.message }, { status: 500 });
+    const msg = gossipError.message ?? "gossip_query_failed";
+    if (msg.includes("does not exist")) {
+      return NextResponse.json({ error: "database_schema_outdated" }, { status: 503 });
+    }
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 
-  if (!gossip || gossip.deleted_at) {
+  if (!gossip) {
     return NextResponse.json({ error: "gossip_not_found" }, { status: 404 });
   }
 
@@ -86,13 +90,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_username" }, { status: 400 });
   }
 
-  if (gossip.user_id && gossip.user_id === user.id) {
-    return NextResponse.json({ error: "self_report_forbidden" }, { status: 400 });
-  }
-
   const reporterUsername = sanitizeText(nicknameFromUser(user) || "user", REPORT_LIMITS.maxUsernameLength);
   if (!isValidUsername(reporterUsername)) {
     return NextResponse.json({ error: "invalid_reporter_profile" }, { status: 400 });
+  }
+
+  if (gossipAuthor === reporterUsername) {
+    return NextResponse.json({ error: "self_report_forbidden" }, { status: 400 });
+  }
+
+  const gossipUserId = (gossip as { user_id?: string | null }).user_id;
+  if (gossipUserId && gossipUserId === user.id) {
+    return NextResponse.json({ error: "self_report_forbidden" }, { status: 400 });
   }
 
   const { data: existing } = await db
@@ -123,6 +132,16 @@ export async function POST(request: NextRequest) {
     if (insertError.message.includes("content_reports_reporter_gossip_unique")) {
       return NextResponse.json({ error: "already_reported" }, { status: 409 });
     }
+    if (
+      insertError.code === "42501" ||
+      insertError.message.includes("row-level security") ||
+      insertError.message.includes("violates row-level security")
+    ) {
+      return NextResponse.json({ error: "report_rls_blocked" }, { status: 503 });
+    }
+    if (insertError.message.includes("does not exist")) {
+      return NextResponse.json({ error: "database_schema_outdated" }, { status: 503 });
+    }
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
@@ -136,12 +155,12 @@ export async function POST(request: NextRequest) {
 
   const admin = getAdminClient();
   if (admin) {
-    const { count: reportCount } = await admin
+    const { count: reportCount, error: countError } = await admin
       .from("content_reports")
       .select("*", { count: "exact", head: true })
       .eq("gossip_id", gossipId);
 
-    if ((reportCount ?? 0) >= REPORT_AUTO_HIDE_THRESHOLD) {
+    if (!countError && (reportCount ?? 0) >= REPORT_AUTO_HIDE_THRESHOLD) {
       await admin
         .from("gossips")
         .update({ deleted_at: new Date().toISOString() })

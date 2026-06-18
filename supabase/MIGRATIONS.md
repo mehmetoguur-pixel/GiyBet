@@ -12,5 +12,6 @@ Supabase Dashboard → SQL Editor'da aşağıdaki dosyaları **sırayla** çalı
 | 6 | `user_follows.sql` | Takip sistemi |
 | 7 | `follow_notifications.sql` | `follow` bildirim tipi |
 | 8 | `features_expansion.sql` | Bildirim tercihleri, ban itiraz, API rate limit |
+| 9 | `content_reports_rls_fix.sql` | Şikayet API insert RLS (security_hardening sonrası) |
 
 Yeni migration eklerken bu listeye satır ekle ve numarayı koru.

@@ -20,13 +20,13 @@ export async function fetchNotificationPreferences(username: string): Promise<No
   const trimmed = username.trim();
   if (!trimmed) return DEFAULT_PREFS;
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("notification_preferences")
     .select("mute_like, mute_comment, mute_reaction, mute_follow")
     .eq("username", trimmed)
     .maybeSingle();
 
-  if (!data) return DEFAULT_PREFS;
+  if (error || !data) return DEFAULT_PREFS;
 
   const row = data as {
     mute_like?: boolean;
