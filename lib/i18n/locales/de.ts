@@ -129,7 +129,7 @@ export const de: Messages = {
     trending: "Trending",
     clearFilter: "Filter löschen",
     mapGossipList: "Klatsch auf der Karte",
-    mapListHintVisible: "Karte verschieben — nur Klatsch im sichtbaren Bereich wird gelistet.",
+    mapListHintVisible: "Auf der Karte nur Klatsch der letzten 24 Stunden. Verschieben — Liste zeigt Pins im sichtbaren Bereich.",
     mapListHintHidden: "Heranzoomen; Pins sind bei weitem Zoom ausgeblendet.",
     filterLabel: "Filter: {{tag}}",
     hashtagHint: "Tipp: #Tags im Klatsch — sie erscheinen in TT nach Häufigkeit.",

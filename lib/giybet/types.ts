@@ -31,6 +31,8 @@ export type MapPin = {
   cityLabel?: string;
   isHot?: boolean;
   roomId?: string;
+  /** ISO — haritada yalnızca son 24 saat */
+  createdAt?: string;
 };
 
 export type City = "Istanbul" | "Ankara";

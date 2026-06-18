@@ -131,7 +131,7 @@ export const tr: Messages = {
     trending: "Trend",
     clearFilter: "Filtreyi temizle",
     mapGossipList: "Haritadaki Gıybetler",
-    mapListHintVisible: "Haritayı kaydır — sadece gördüğün alandaki gıybetler listelenir.",
+    mapListHintVisible: "Haritada yalnızca son 24 saatin gıybetleri görünür. Kaydır — listede sadece bu alandaki pinler.",
     mapListHintHidden: "Haritayı yakınlaştır; uzak görünümde pinler gizlenir.",
     filterLabel: "Filtre: {{tag}}",
     hashtagHint: "İpucu: gıybete #etiket yaz — TT bölümünde yoğunluğa göre listelenir.",

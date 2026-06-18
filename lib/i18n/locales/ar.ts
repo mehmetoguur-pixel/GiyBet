@@ -129,7 +129,7 @@ export const ar: Messages = {
     trending: "الرائج",
     clearFilter: "مسح الفلتر",
     mapGossipList: "نميمة على الخريطة",
-    mapListHintVisible: "حرّك الخريطة — تُعرض النميمة في المنطقة المرئية فقط.",
+    mapListHintVisible: "على الخريطة تظهر نمائم آخر 24 ساعة فقط. حرّك الخريطة — القائمة تعرض الدبابيس في المنطقة المرئية.",
     mapListHintHidden: "كبّر؛ الدبابيس مخفية عند التصغير.",
     filterLabel: "فلتر: {{tag}}",
     hashtagHint: "نصيحة: استخدم #وسم في النميمة — يظهر في TT حسب الشعبية.",

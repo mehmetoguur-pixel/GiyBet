@@ -97,6 +97,7 @@ export function gossipRowToMapPin(
     avatar,
     city: feedCity,
     cityLabel: row.city?.trim() || undefined,
+    ...(row.created_at ? { createdAt: row.created_at } : {}),
     ...(row.room_id ? { roomId: row.room_id } : {}),
   };
 }

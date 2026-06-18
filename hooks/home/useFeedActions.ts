@@ -35,6 +35,7 @@ import { isBanError } from "@/lib/rate-limit";
 import { getLocalizedString } from "@/lib/i18n";
 import { useFeedRealtime } from "@/hooks/feed/useFeedRealtime";
 import { mergeServerPostsIntoFeed } from "@/lib/gossip/realtime-feed";
+import { filterFreshMapPins } from "@/lib/map/pin-age";
 import { supabase } from "@/lib/supabase";
 import type { PlaceDetail } from "@/lib/places-api";
 import type {
@@ -82,7 +83,7 @@ export function useFeedActions({
     try {
       const { posts, pins } = await fetchGossipsFromSupabase(nickname);
       setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, posts));
-      setMapPins(pins);
+      setMapPins(filterFreshMapPins(pins));
       const withComments = await enrichPostsWithComments(posts);
       setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, withComments));
     } finally {
@@ -121,6 +122,15 @@ export function useFeedActions({
     setMapPins,
     onRefresh: refreshFeed,
   });
+
+  useEffect(() => {
+    if (!onFeed) return;
+    const pruneExpiredMapPins = () => {
+      setMapPins((prev) => filterFreshMapPins(prev));
+    };
+    const intervalId = window.setInterval(pruneExpiredMapPins, 60_000);
+    return () => window.clearInterval(intervalId);
+  }, [onFeed]);
 
   const clearFeedData = () => {
     setFeedPosts([]);
@@ -357,6 +367,7 @@ export function useFeedActions({
         avatar: parseGossipAvatar(row.avatar) ?? avatarCreator,
         isUserPin: location.hasUserCoords,
         roomId: linkedRoom.id,
+        createdAt: row.created_at ?? new Date().toISOString(),
       },
       ...prev,
     ]);

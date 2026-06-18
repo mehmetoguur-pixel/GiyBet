@@ -129,7 +129,7 @@ export const en: Messages = {
     trending: "Trending",
     clearFilter: "Clear filter",
     mapGossipList: "Gossip on map",
-    mapListHintVisible: "Pan the map — only gossip in the visible area is listed.",
+    mapListHintVisible: "Only gossip from the last 24 hours appears on the map. Pan — the list shows pins in view.",
     mapListHintHidden: "Zoom in; pins are hidden at wide zoom.",
     filterLabel: "Filter: {{tag}}",
     hashtagHint: "Tip: use #tags in your gossip — they appear in TT trending.",

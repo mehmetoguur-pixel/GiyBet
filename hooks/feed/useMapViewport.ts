@@ -9,6 +9,7 @@ import {
   type PlaceDetail,
 } from "@/lib/places-api";
 import { MAP_GOSSIP_PINS_MIN_ZOOM } from "@/lib/map/constants";
+import { isMapPinWithinWindow } from "@/lib/map/pin-age";
 import { isCoordInMapBounds } from "@/lib/geo";
 import { findRoomByPlaceIdLocal } from "@/lib/rooms/api";
 import type {
@@ -164,9 +165,17 @@ export function useMapViewport({
   const mapDisplayPins = useMemo(() => {
     if (mapZoom < MAP_GOSSIP_PINS_MIN_ZOOM || !mapViewportBounds) return [];
     return mapPins
+      .filter((pin) => isMapPinWithinWindow(pin.createdAt))
       .filter((pin) => !blockedAuthors.has(pin.author.trim()))
       .filter((pin) => isCoordInMapBounds(pin.lat, pin.lng, mapViewportBounds));
   }, [mapPins, blockedAuthors, mapZoom, mapViewportBounds]);
+
+  useEffect(() => {
+    if (!selectedMapPin) return;
+    if (!isMapPinWithinWindow(selectedMapPin.createdAt)) {
+      setSelectedMapPin(null);
+    }
+  }, [selectedMapPin, mapPins]);
 
   const pinsInMapViewport = mapDisplayPins;
   const mapPinsVisible = mapZoom >= MAP_GOSSIP_PINS_MIN_ZOOM;

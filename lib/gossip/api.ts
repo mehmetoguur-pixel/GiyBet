@@ -16,6 +16,7 @@ import {
   normalizeGossipId,
 } from "./parsers";
 import { gossipRowToFeedPost, gossipRowToMapPin } from "./transform";
+import { isMapPinWithinWindow } from "@/lib/map/pin-age";
 
 export async function uploadGossipImage(file: File): Promise<string | null> {
   try {
@@ -135,7 +136,9 @@ export async function fetchGossipsFromSupabase(currentUsername = ""): Promise<{
     const row = raw as GossipRow;
     const post = gossipRowToFeedPost(row, currentUsername, locale);
     posts.push(post);
-    pins.push(gossipRowToMapPin(row, post.id, post.author, post.avatar));
+    if (isMapPinWithinWindow(row.created_at)) {
+      pins.push(gossipRowToMapPin(row, post.id, post.author, post.avatar));
+    }
     gossipIds.push(normalizeGossipId(row.id));
   }
 
