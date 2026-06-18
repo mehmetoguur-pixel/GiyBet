@@ -10,6 +10,7 @@ import {
   fetchGossipsFromSupabase,
   fetchGossipsPage,
   insertCommentToSupabase,
+  insertGossipRow,
   notifyPostAuthor,
   updateGossipEngagement,
   uploadGossipImage,
@@ -264,52 +265,31 @@ export function useFeedActions({
       username: nickname,
       tags: postTags,
     };
-    if (registeredUser?.userId) gossipInsert.user_id = registeredUser.userId;
     if (persistedImageUrl) gossipInsert.image_url = persistedImageUrl;
     if (shareLocation?.locationLabel) gossipInsert.location_label = shareLocation.locationLabel;
     if (shareLocation?.district) gossipInsert.district = shareLocation.district;
     const venueName = shareLocation?.venue ?? payload.venue;
     if (venueName) gossipInsert.venue_name = venueName;
 
-    const insertPayload = { ...gossipInsert };
-    let insertResult = await supabase
-      .from("gossips")
-      .insert([insertPayload])
-      .select()
-      .single();
+    const { row, error: insertError } = await insertGossipRow(gossipInsert);
 
-    if (
-      insertResult.error &&
-      (insertResult.error.message.includes("location_label") ||
-        insertResult.error.message.includes("district") ||
-        insertResult.error.message.includes("venue_name") ||
-        insertResult.error.message.includes("tags") ||
-        insertResult.error.message.includes("schema cache"))
-    ) {
-      delete insertPayload.location_label;
-      delete insertPayload.district;
-      delete insertPayload.venue_name;
-      delete insertPayload.tags;
-      insertResult = await supabase.from("gossips").insert([insertPayload]).select().single();
-    }
-
-    const { data, error: insertError } = insertResult;
-
-    if (insertError) {
-      if (isBanError(insertError.message)) {
+    if (insertError || !row) {
+      if (insertError && isBanError(insertError)) {
         throw new Error(t("errors.userBanned"));
       }
-      if (isRateLimitError(insertError.message)) {
+      if (insertError && isRateLimitError(insertError)) {
         throw new Error(
-          insertError.message.includes("hour")
+          insertError.includes("hour")
             ? t("errors.rateLimitHour")
             : t("errors.rateLimitMinute"),
         );
       }
-      throw new Error(insertError.message || getLocalizedString("errors.gossipDbFailed"));
+      if (insertError?.includes("authentication required")) {
+        throw new Error(t("errors.gossipSaveFailed"));
+      }
+      throw new Error(insertError || getLocalizedString("errors.gossipDbFailed"));
     }
 
-    const row = data as GossipRow;
     const gossipId = normalizeGossipId(row.id);
     const chatLabel = gossipChatLabel(
       trimmedText ||
@@ -321,14 +301,18 @@ export function useFeedActions({
       { lat: location.lat, lng: location.lng, city: location.city },
       trimmedText || "📷",
       { skipExistingLookup: true },
-    );
-
-    await supabase.from("gossips").update({ room_id: linkedRoom.id }).eq("id", row.id);
-
-    setMapRooms((prev) => {
-      if (prev.some((room) => room.id === linkedRoom.id)) return prev;
-      return [linkedRoom, ...prev];
+    ).catch((roomErr) => {
+      console.warn("Sohbet odası oluşturulamadı:", roomErr);
+      return null;
     });
+
+    if (linkedRoom) {
+      await supabase.from("gossips").update({ room_id: linkedRoom.id }).eq("id", row.id);
+      setMapRooms((prev) => {
+        if (prev.some((room) => room.id === linkedRoom.id)) return prev;
+        return [linkedRoom, ...prev];
+      });
+    }
 
     const postId = asPostId(row.id);
     const basePost = gossipRowToFeedPost(row, nickname);
@@ -371,7 +355,7 @@ export function useFeedActions({
         text: newPost.text,
         avatar: parseGossipAvatar(row.avatar) ?? avatarCreator,
         isUserPin: location.hasUserCoords,
-        roomId: linkedRoom.id,
+        roomId: linkedRoom?.id,
         createdAt: row.created_at ?? new Date().toISOString(),
       },
       ...prev,

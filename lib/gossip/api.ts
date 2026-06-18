@@ -115,6 +115,76 @@ export async function fetchCommentsByGossipIds(gossipIds: string[]): Promise<Map
   }
   return map;
 }
+
+function isGossipInsertSchemaError(message: string): boolean {
+  return (
+    message.includes("column") ||
+    message.includes("schema cache") ||
+    message.includes("null value") ||
+    message.includes("violates not-null")
+  );
+}
+
+/** Oturum + RLS uyumlu gıybet insert — user_id istemciden gönderilmez */
+export async function insertGossipRow(
+  base: Record<string, unknown>,
+): Promise<{ row: GossipRow | null; error: string | null }> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session) {
+    return { row: null, error: "authentication required" };
+  }
+
+  const payloads: Record<string, unknown>[] = [];
+  const full: Record<string, unknown> = { ...base };
+  delete full.user_id;
+
+  payloads.push({ ...full });
+
+  const withoutGeoMeta = { ...full };
+  delete withoutGeoMeta.location_label;
+  delete withoutGeoMeta.district;
+  delete withoutGeoMeta.venue_name;
+  delete withoutGeoMeta.tags;
+  delete withoutGeoMeta.image_url;
+  payloads.push(withoutGeoMeta);
+
+  if (typeof full.username === "string" && full.username.trim()) {
+    const withAuthor = { ...withoutGeoMeta };
+    delete withAuthor.username;
+    withAuthor.author = full.username;
+    payloads.push(withAuthor);
+  }
+
+  payloads.push({
+    content: full.content,
+    city: full.city,
+    lat: full.lat,
+    lng: full.lng,
+    username: full.username,
+  });
+
+  let lastError = getLocalizedString("errors.gossipDbFailed");
+  for (const payload of payloads) {
+    const { data, error } = await supabase.from("gossips").insert([payload]).select().single();
+    if (!error && data) {
+      return { row: data as GossipRow, error: null };
+    }
+    lastError = error?.message ?? lastError;
+    if (
+      lastError.includes("authentication required") ||
+      lastError.includes("user_banned") ||
+      lastError.includes("rate_limit")
+    ) {
+      return { row: null, error: lastError };
+    }
+    if (!isGossipInsertSchemaError(lastError) && !lastError.includes("row-level security")) {
+      break;
+    }
+  }
+
+  return { row: null, error: lastError };
+}
+
 export async function fetchGossipsPage(
   offset: number,
   limit: number,
