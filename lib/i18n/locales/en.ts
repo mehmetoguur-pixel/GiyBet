@@ -232,6 +232,7 @@ export const en: Messages = {
     wardrobeSubtitle: "Update your style — it shows on the map and in comments instantly.",
     reactionScore: "🔥 {{score}} gossip likes",
     historyGossips: "My past gossip",
+    gossipDetailTitle: "Gossip detail",
     changePassword: "🔐 Change password",
     oldPassword: "Current password",
     confirmNewPassword: "Confirm new password",

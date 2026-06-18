@@ -45,11 +45,11 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
     handleGossipChatSend,
     leaveGossipChat,
     likersModalPost,
+    authorReactionScores,
     setLikersModalPostId,
     selectedMapPin,
     selectedMapPost,
     setSelectedMapPin,
-    authorReactionScores,
     handleOpenReport,
     mapShareTarget,
     setMapShareTarget,
@@ -158,6 +158,7 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
         onLogout={onLogout}
         btnPrimary={btnPrimary}
         btnSecondary={btnSecondary}
+        authorReactionScores={authorReactionScores}
       />
     </>
   );

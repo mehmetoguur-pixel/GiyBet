@@ -232,6 +232,7 @@ export const de: Messages = {
     wardrobeSubtitle: "Style aktualisieren — sofort auf Karte und in Kommentaren sichtbar.",
     reactionScore: "🔥 {{score}} Klatsch-Likes",
     historyGossips: "Meine früheren Klatsch",
+    gossipDetailTitle: "Klatsch-Details",
     changePassword: "🔐 Passwort ändern",
     oldPassword: "Aktuelles Passwort",
     confirmNewPassword: "Neues Passwort bestätigen",

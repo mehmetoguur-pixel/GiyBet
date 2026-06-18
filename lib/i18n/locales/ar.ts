@@ -232,6 +232,7 @@ export const ar: Messages = {
     wardrobeSubtitle: "حدّث أسلوبك — يظهر على الخريطة والتعليقات فوراً.",
     reactionScore: "🔥 {{score}} إعجاب نميمة",
     historyGossips: "نميمتي السابقة",
+    gossipDetailTitle: "تفاصيل النميمة",
     changePassword: "🔐 تغيير كلمة المرور",
     oldPassword: "كلمة المرور الحالية",
     confirmNewPassword: "تأكيد كلمة المرور الجديدة",

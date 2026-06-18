@@ -235,6 +235,7 @@ export const tr: Messages = {
     wardrobeSubtitle: "Tarzını güncelle; harita ve yorumlarda anında yansır.",
     reactionScore: "🔥 {{score}} Gıybet Beğenisi",
     historyGossips: "Geçmiş Gıybetlerim",
+    gossipDetailTitle: "Gıybet detayı",
     changePassword: "🔐 Şifre Değiştir",
     oldPassword: "Eski Şifre",
     confirmNewPassword: "Yeni Şifreyi Onayla",

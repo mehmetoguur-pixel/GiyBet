@@ -14,6 +14,7 @@ import { useI18n } from "@/lib/i18n/provider";
 import { LanguageSwitcher } from "@/lib/i18n/LanguageSwitcher";
 import { AvatarImage } from "@/components/ui/AvatarImage";
 import { FaceStudioPanel } from "@/components/profile/FaceStudioPanel";
+import { ProfileGossipDetailModal } from "@/components/profile/ProfileGossipDetailModal";
 import { NeonToast } from "@/components/ui/NeonToast";
 import { PasswordField } from "@/components/auth/PasswordField";
 
@@ -35,6 +36,7 @@ export function ProfilePanel({
   onLogout,
   btnPrimary,
   btnSecondary,
+  authorReactionScores,
 }: {
   open: boolean;
   onClose: () => void;
@@ -53,6 +55,7 @@ export function ProfilePanel({
   onLogout: () => void;
   btnPrimary: string;
   btnSecondary: string;
+  authorReactionScores?: Record<string, number>;
 }) {
   const { t } = useI18n();
   const [profileTab, setProfileTab] = useState<"overview" | "history">("overview");
@@ -69,6 +72,7 @@ export function ProfilePanel({
     text: string;
   } | null>(null);
   const [passwordToast, setPasswordToast] = useState<string | null>(null);
+  const [selectedHistoryPost, setSelectedHistoryPost] = useState<FeedPost | null>(null);
   const passwordToastTimeoutRef = useRef<number | null>(null);
 
   const resetPasswordForm = () => {
@@ -136,6 +140,7 @@ export function ProfilePanel({
       queueMicrotask(() => {
         setPasswordFormOpen(false);
         resetPasswordForm();
+        setSelectedHistoryPost(null);
       });
     }
   }, [open]);
@@ -368,18 +373,26 @@ export function ProfilePanel({
                     </p>
                   ) : (
                     userPosts.map((post) => (
-                      <div
-                        key={post.id}
-                        className="rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-3 py-2.5"
+                      <button
+                        key={post.gossipId ?? String(post.id)}
+                        type="button"
+                        onClick={() => setSelectedHistoryPost(post)}
+                        className="w-full rounded-xl border border-zinc-800/80 bg-zinc-900/50 px-3 py-2.5 text-left transition-all hover:border-purple-500/35 hover:bg-zinc-900/80 active:scale-[0.99]"
                       >
                         {formatLocationLabel(post) && (
                           <p className="mb-1 text-[10px] font-medium text-pink-300/80">
                             📍 {formatLocationLabel(post)}
                           </p>
                         )}
-                        <p className="text-xs leading-relaxed text-zinc-300">{post.text}</p>
-                        <p className="mt-1 text-[10px] text-zinc-600">{post.time}</p>
-                      </div>
+                        <p className="line-clamp-2 text-xs leading-relaxed text-zinc-300">
+                          {post.text || (post.imageUrl ? t("common.photo") : "")}
+                        </p>
+                        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] text-zinc-600">
+                          <span>{post.time}</span>
+                          <span>♥ {post.likers.length}</span>
+                          <span>💬 {post.commentItems.length}</span>
+                        </div>
+                      </button>
                     ))
                   )}
                 </div>
@@ -425,6 +438,13 @@ export function ProfilePanel({
       </div>
       </div>
       {passwordToast && <NeonToast message={passwordToast} variant="success" />}
+      {selectedHistoryPost && (
+        <ProfileGossipDetailModal
+          post={selectedHistoryPost}
+          authorReactionScores={authorReactionScores}
+          onClose={() => setSelectedHistoryPost(null)}
+        />
+      )}
     </>
   );
 }
