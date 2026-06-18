@@ -59,6 +59,18 @@ export function haversineDistanceMeters(lat1: number, lng1: number, lat2: number
   return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+/** Küçük GPS sıçramalarını yoksay (metre) */
+export const GEO_STABILITY_MIN_METERS = 250;
+
+export function coordsMovedSignificantly(
+  prev: GeoCoords | null,
+  next: GeoCoords,
+  minMeters = GEO_STABILITY_MIN_METERS,
+): boolean {
+  if (!prev) return true;
+  return haversineDistanceMeters(prev.lat, prev.lng, next.lat, next.lng) >= minMeters;
+}
+
 export function getNearbyVenues(lat: number, lng: number, limit = 6): NearbyVenue[] {
   const ranked = VENUE_POINTS.map((venue) => ({
     ...venue,
@@ -98,8 +110,8 @@ export function requestGeolocation(options?: { highAccuracy?: boolean }): Promis
       (err) => reject(err),
       {
         enableHighAccuracy: options?.highAccuracy ?? false,
-        timeout: 8000,
-        maximumAge: 120000,
+        timeout: 12000,
+        maximumAge: 300000,
       },
     );
   });
@@ -113,7 +125,7 @@ export function buildShareLocationFast(
 ): ShareLocationFields {
   const feedCity: City = options?.city ?? detectCityFromCoords(lat, lng);
   const cityLabel = formatFeedCityLabel(feedCity) ?? feedCity;
-  const district = options?.manualDistrict?.trim() || mockDistrictForCity(feedCity);
+  const district = options?.manualDistrict?.trim() || mockDistrictForCity(feedCity, lat, lng);
   const venue = options?.venue?.trim();
   const locationLabel =
     formatLocationLabel({ city: feedCity, cityLabel, district, venue }) ??
@@ -146,7 +158,7 @@ export async function resolveShareLocationAtCoords(
   const district =
     options?.manualDistrict?.trim() ||
     geocoded?.district?.trim() ||
-    mockDistrictForCity(feedCity);
+    mockDistrictForCity(feedCity, lat, lng);
   const venue = options?.venue?.trim();
   const locationLabel =
     formatLocationLabel({

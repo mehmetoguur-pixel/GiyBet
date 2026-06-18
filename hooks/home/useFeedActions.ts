@@ -235,7 +235,7 @@ export function useFeedActions({
               location.city,
             district:
               payload.district?.trim() ||
-              mockDistrictForCity(payload.city ?? location.feedCity),
+              mockDistrictForCity(payload.city ?? location.feedCity, location.lat, location.lng),
             locationLabel:
               payload.locationLabel?.trim() ||
               (formatLocationLabel({

@@ -38,13 +38,19 @@ export function formatLocationLabel(post: {
   if (cityName) return cityName;
   return null;
 }
-export function mockDistrictForCity(city: City): string {
+export function mockDistrictForCity(city: City, lat?: number, lng?: number): string {
   const districts: Record<City, string[]> = {
     Istanbul: ["Beşiktaş", "Kadıköy", "Şişli", "Taksim"],
     Ankara: ["Yenimahalle", "Kızılay", "Çankaya", "Ulus"],
   };
   const list = districts[city];
-  return list[Math.floor(Math.random() * list.length)];
+  if (lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng)) {
+    const latBucket = Math.round(lat * 100);
+    const lngBucket = Math.round(lng * 100);
+    const index = Math.abs(latBucket * 31 + lngBucket * 17) % list.length;
+    return list[index];
+  }
+  return list[0];
 }
 export const RADAR_MIN_METERS = 500;
 export const RADAR_MAX_METERS = 20000;

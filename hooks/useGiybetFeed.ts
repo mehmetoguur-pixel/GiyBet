@@ -44,7 +44,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     initialGossipId,
   } = props;
 
-  const { t, nominatimLanguage, placesLanguage } = useI18n();
+  const { t, placesLanguage } = useI18n();
 
   const [feedTab, setFeedTab] = useState<FeedViewTab>("feed");
   const [likersModalPostId, setLikersModalPostId] = useState<number | null>(null);
@@ -90,7 +90,6 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   const handleSelectFollowingTab = useCallback(() => setFeedTab("following"), []);
 
   const geo = useFeedGeo({
-    nominatimLanguage,
     t,
     onOpenMap: handleOpenMap,
   });

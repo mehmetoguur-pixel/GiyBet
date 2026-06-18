@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { reverseGeocodeNominatim } from "@/lib/nominatim-api";
 import { formatFeedCityLabel } from "@/lib/feed/format";
 import {
+  coordsMovedSignificantly,
   detectCityFromCoords,
   getNearbyVenues,
   requestGeolocation,
@@ -12,31 +12,41 @@ import { DEFAULT_GOSSIP_LOCATION } from "@/lib/gossip/constants";
 import type { GeoCoords, NearbyVenue } from "@/lib/giybet/types";
 
 type UseFeedGeoOptions = {
-  nominatimLanguage: string;
   t: (key: string) => string;
   onOpenMap?: () => void;
 };
 
-export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOptions) {
+export function useFeedGeo({ t, onOpenMap }: UseFeedGeoOptions) {
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [geoError, setGeoError] = useState("");
   const [geoCoords, setGeoCoords] = useState<GeoCoords | null>(null);
   const [nearbyVenues, setNearbyVenues] = useState<NearbyVenue[]>([]);
   const [userCity, setUserCity] = useState<string | null>(null);
 
+  const geoCoordsRef = useRef<GeoCoords | null>(null);
   const onOpenMapRef = useRef(onOpenMap);
   onOpenMapRef.current = onOpenMap;
 
-  const applyUserLocation = useCallback(async (coords: GeoCoords, openMap = false) => {
-    setGeoCoords(coords);
-    const fastCity =
-      formatFeedCityLabel(detectCityFromCoords(coords.lat, coords.lng)) ?? null;
-    setUserCity(fastCity);
-    setGeoStatus("success");
-    setGeoError("");
-    setNearbyVenues(getNearbyVenues(coords.lat, coords.lng));
-    if (openMap) onOpenMapRef.current?.();
-  }, []);
+  const applyUserLocation = useCallback(
+    (coords: GeoCoords, openMap = false, force = false) => {
+      if (!force && !coordsMovedSignificantly(geoCoordsRef.current, coords)) {
+        if (openMap) onOpenMapRef.current?.();
+        return false;
+      }
+
+      geoCoordsRef.current = coords;
+      setGeoCoords(coords);
+      const fastCity =
+        formatFeedCityLabel(detectCityFromCoords(coords.lat, coords.lng)) ?? null;
+      setUserCity(fastCity);
+      setGeoStatus("success");
+      setGeoError("");
+      setNearbyVenues(getNearbyVenues(coords.lat, coords.lng));
+      if (openMap) onOpenMapRef.current?.();
+      return true;
+    },
+    [],
+  );
 
   const applyUserLocationRef = useRef(applyUserLocation);
   applyUserLocationRef.current = applyUserLocation;
@@ -47,7 +57,7 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
     setGeoStatus("loading");
     requestGeolocation()
       .then((coords) => {
-        if (!cancelled) applyUserLocationRef.current(coords);
+        if (!cancelled) applyUserLocationRef.current(coords, false, true);
       })
       .catch(() => {
         if (cancelled) return;
@@ -55,27 +65,20 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
         setGeoError(
           "Konum izni verilmedi. Yakın mekanlar varsayılan bölgeye göre listeleniyor.",
         );
-        applyUserLocationRef.current({
-          lat: DEFAULT_GOSSIP_LOCATION.lat,
-          lng: DEFAULT_GOSSIP_LOCATION.lng,
-        });
+        applyUserLocationRef.current(
+          {
+            lat: DEFAULT_GOSSIP_LOCATION.lat,
+            lng: DEFAULT_GOSSIP_LOCATION.lng,
+          },
+          false,
+          true,
+        );
       });
 
     return () => {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    if (!geoCoords) return;
-    void reverseGeocodeNominatim(
-      geoCoords.lat,
-      geoCoords.lng,
-      nominatimLanguage,
-    ).then((geocoded) => {
-      if (geocoded?.cityLabel) setUserCity(geocoded.cityLabel);
-    });
-  }, [geoCoords, nominatimLanguage]);
 
   const handleRequestLocation = async () => {
     setGeoError("");
@@ -85,6 +88,7 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
       applyUserLocation(
         { lat: DEFAULT_GOSSIP_LOCATION.lat, lng: DEFAULT_GOSSIP_LOCATION.lng },
         true,
+        true,
       );
       return;
     }
@@ -92,12 +96,13 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
     setGeoStatus("loading");
     try {
       const coords = await requestGeolocation({ highAccuracy: true });
-      applyUserLocation(coords, true);
+      applyUserLocation(coords, true, true);
     } catch {
       setGeoStatus("error");
       setGeoError(t("feed.geoDenied"));
       applyUserLocation(
         { lat: DEFAULT_GOSSIP_LOCATION.lat, lng: DEFAULT_GOSSIP_LOCATION.lng },
+        true,
         true,
       );
     }
@@ -107,7 +112,9 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
     geoStatus,
     geoError,
     geoCoords,
-    setGeoCoords,
+    setGeoCoords: (coords: GeoCoords) => {
+      applyUserLocation(coords, false, false);
+    },
     userCity,
     setUserCity,
     nearbyVenues,

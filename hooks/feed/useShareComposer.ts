@@ -54,6 +54,7 @@ export function useShareComposer({
   const [shareImagePreview, setShareImagePreview] = useState<string | null>(null);
   const [shareImageFile, setShareImageFile] = useState<File | null>(null);
   const shareFileInputRef = useRef<HTMLInputElement>(null);
+  const sharePreviewKeyRef = useRef("");
 
   const clearShareImage = () => {
     if (shareImagePreview) URL.revokeObjectURL(shareImagePreview);
@@ -72,14 +73,21 @@ export function useShareComposer({
     const lng = selectedFeedPlace?.lng ?? geoCoords?.lng;
     if (lat == null || lng == null) {
       setShareLocationPreview("");
+      sharePreviewKeyRef.current = "";
       return;
     }
+
+    const previewKey = `${selectedFeedPlace?.placeId ?? ""}:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+    if (previewKey === sharePreviewKeyRef.current) return;
+    sharePreviewKeyRef.current = previewKey;
 
     const city = detectCityFromCoords(lat, lng);
     const loc = buildShareLocationFast(lat, lng, {
       city,
       venue: selectedFeedPlace?.name,
-      manualDistrict: selectedFeedPlace ? mockDistrictForCity(city) : undefined,
+      manualDistrict: selectedFeedPlace
+        ? mockDistrictForCity(city, lat, lng)
+        : undefined,
     });
     setShareLocationPreview(loc.locationLabel);
   }, [geoCoords, selectedFeedPlace]);
@@ -129,7 +137,7 @@ export function useShareComposer({
       const shareLocation = buildShareLocationFast(shareCoords.lat, shareCoords.lng, {
         city: shareCity,
         venue: sharePlace?.name,
-        manualDistrict: sharePlace ? mockDistrictForCity(shareCity) : undefined,
+        manualDistrict: sharePlace ? mockDistrictForCity(shareCity, shareCoords.lat, shareCoords.lng) : undefined,
       });
 
       const result = await handleShareWithChat({
