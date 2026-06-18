@@ -1,0 +1,2 @@
+-- Bu dosya yerine engagement_setup.sql kullanın (yorum + beğeni).
+-- Eski kurulum: supabase/engagement_setup.sql

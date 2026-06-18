@@ -1,0 +1,9 @@
+Uygulama Adı: GıyBet
+Altyapı: Next.js (App Router), Tailwind CSS, TypeScript
+
+PROJE KURALLARI:
+1. Bu proje, konum tabanlı ve anonim bir sosyal medya uygulamasıdır.
+2. Kullanıcıların gerçek kimlikleri (E-posta/Telefon) arkada saklanır, içeride sadece "Gıybet Adı" ve tasarladıkları çizgi karakter (Avatar) görünür.
+3. Her yeni özellik ekleme veya çıkarma isteğinde, mevcut çalışan kodları bozmadan, ilgili dosyaları modüler bir şekilde güncelle.
+4. Tasarım her zaman modern, koyu mod (dark mode) uyumlu, minimalist ve neon mor/pembe/kırmızı esintili olmalıdır.
+5. Ekranın en altında her zaman ince bir banner reklam alanı (placeholder) yer almalıdır.

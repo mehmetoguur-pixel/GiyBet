@@ -1,0 +1,494 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+@keyframes otp-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.animate-otp-shake {
+  animation: otp-shake 0.45s ease-in-out;
+}
+
+/* Leaflet — Gıybet Haritası Bitmoji pinleri */
+.giybet-pin-wrapper {
+  background: transparent !important;
+  border: none !important;
+  overflow: visible !important;
+}
+
+.giybet-marker-host {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  overflow: visible;
+}
+
+.giybet-marker-host--hot {
+  width: 72px;
+  height: 72px;
+}
+
+.giybet-sonar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 48px;
+  height: 48px;
+  margin: -24px 0 0 -24px;
+  border-radius: 50%;
+  border: 2px solid rgba(236, 72, 153, 0.75);
+  box-shadow:
+    0 0 14px rgba(236, 72, 153, 0.55),
+    0 0 24px rgba(168, 85, 247, 0.35);
+  pointer-events: none;
+  animation: giybet-sonar-pulse 2.4s ease-out infinite;
+}
+
+.giybet-marker-host--hot .giybet-sonar-ring {
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+}
+
+.giybet-sonar-ring--2 {
+  animation-delay: 0.8s;
+}
+
+.giybet-sonar-ring--3 {
+  animation-delay: 1.6s;
+}
+
+@keyframes giybet-sonar-pulse {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.95;
+    border-color: rgba(244, 114, 182, 0.95);
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+    border-color: rgba(168, 85, 247, 0);
+  }
+}
+
+.giybet-avatar-marker--hot {
+  position: relative;
+  z-index: 2;
+  border-color: #f472b6 !important;
+  box-shadow:
+    0 0 16px rgba(236, 72, 153, 0.9),
+    0 0 28px rgba(168, 85, 247, 0.65) !important;
+}
+
+.giybet-avatar-marker {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid #ec4899;
+  overflow: hidden;
+  background: #12121a;
+  box-shadow:
+    0 0 12px rgba(236, 72, 153, 0.75),
+    0 0 22px rgba(168, 85, 247, 0.45);
+}
+
+.giybet-avatar-marker--self {
+  border-color: #a855f7;
+  box-shadow:
+    0 0 14px rgba(168, 85, 247, 0.85),
+    0 0 26px rgba(236, 72, 153, 0.55);
+}
+
+.giybet-avatar-marker img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.giybet-user-location-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.giybet-user-loc-pulse {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a855f7;
+  border: 2px solid #ec4899;
+  box-shadow:
+    0 0 12px rgba(168, 85, 247, 0.9),
+    0 0 24px rgba(236, 72, 153, 0.55);
+  animation: giybet-user-loc-pulse 2s ease-out infinite;
+}
+
+@keyframes giybet-user-loc-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow:
+      0 0 12px rgba(168, 85, 247, 0.9),
+      0 0 24px rgba(236, 72, 153, 0.55);
+  }
+  70% {
+    transform: scale(1.35);
+    box-shadow:
+      0 0 18px rgba(168, 85, 247, 0.5),
+      0 0 36px rgba(236, 72, 153, 0.25);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 12px rgba(168, 85, 247, 0.9),
+      0 0 24px rgba(236, 72, 153, 0.55);
+  }
+}
+
+.giybet-room-pin-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.giybet-room-marker-host {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.giybet-room-marker-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(251, 191, 36, 0.55);
+  animation: giybet-room-ring-pulse 2.2s ease-out infinite;
+}
+
+.giybet-room-marker-ring--2 {
+  animation-delay: 0.9s;
+}
+
+.giybet-room-marker-core {
+  position: relative;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 18px;
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.95), rgba(236, 72, 153, 0.85));
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 0 16px rgba(251, 191, 36, 0.75),
+    0 0 28px rgba(236, 72, 153, 0.45);
+}
+
+.giybet-room-marker-host--highlight .giybet-room-marker-core {
+  width: 42px;
+  height: 42px;
+  font-size: 22px;
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 0 24px rgba(168, 85, 247, 0.95),
+    0 0 40px rgba(236, 72, 153, 0.75),
+    0 0 56px rgba(251, 191, 36, 0.55);
+  animation: giybet-room-highlight-pulse 1.4s ease-in-out infinite;
+}
+
+.giybet-room-marker-host--highlight .giybet-room-marker-ring {
+  border-color: rgba(168, 85, 247, 0.85);
+  animation: giybet-room-ring-pulse 1.2s ease-out infinite;
+}
+
+@keyframes giybet-room-highlight-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.gossip-launch-spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 3px solid rgba(168, 85, 247, 0.25);
+  border-top-color: rgba(236, 72, 153, 0.95);
+  border-right-color: rgba(168, 85, 247, 0.85);
+  animation: gossip-launch-spin 0.85s linear infinite;
+  box-shadow:
+    0 0 20px rgba(168, 85, 247, 0.45),
+    0 0 32px rgba(236, 72, 153, 0.25);
+}
+
+@keyframes gossip-launch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes giybet-room-ring-pulse {
+  0% {
+    transform: scale(0.75);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+.giybet-place-pin-wrapper,
+.giybet-selected-place-pin-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.giybet-place-marker-host {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.giybet-place-marker-glow {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, transparent 70%);
+  animation: giybet-place-glow 2.6s ease-in-out infinite;
+}
+
+.giybet-place-marker-emoji {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
+}
+
+.giybet-selected-place-host {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.giybet-selected-place-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(236, 72, 153, 0.75);
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.55);
+  animation: giybet-selected-place-pulse 1.8s ease-out infinite;
+}
+
+.giybet-selected-place-emoji {
+  position: relative;
+  z-index: 1;
+  font-size: 20px;
+}
+
+@keyframes giybet-place-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes giybet-selected-place-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0.15;
+  }
+}
+
+.leaflet-container {
+  background: #08080f !important;
+  font-family: inherit;
+  z-index: 0 !important;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control {
+  z-index: auto;
+}
+
+.leaflet-popup-pane {
+  z-index: 700;
+}
+
+.giybet-popup .leaflet-popup-content-wrapper {
+  background: #12121a;
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.35);
+  color: #e4e4e7;
+}
+
+.giybet-popup .leaflet-popup-tip {
+  background: #12121a;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.giybet-popup .leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.45;
+}
+
+.giybet-map-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.giybet-map-popup-header img {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  object-fit: cover;
+  background: #12121a;
+}
+
+.giybet-map-popup-author {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f9a8d4;
+}
+
+.giybet-map-popup-location {
+  display: block;
+  font-size: 10px;
+  color: #71717a;
+  margin-top: 2px;
+}
+
+.giybet-map-popup-text {
+  margin: 0;
+  font-size: 12px;
+  color: #d4d4d8;
+}
+
+.animate-gossip-flash {
+  animation: gossip-flash 0.55s ease-in-out infinite;
+}
+
+@keyframes gossip-flash {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 32px rgba(236, 72, 153, 0.55);
+    border-color: rgba(236, 72, 153, 0.6);
+  }
+  50% {
+    opacity: 0.82;
+    box-shadow: 0 0 48px rgba(168, 85, 247, 0.75);
+    border-color: rgba(244, 114, 182, 0.95);
+  }
+}
+
+.giybet-map-popup-venue {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f9a8d4;
+  text-shadow: 0 0 12px rgba(236, 72, 153, 0.65);
+}
+
+.giybet-radar-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.giybet-radar-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(244, 114, 182, 0.9);
+  background: #12121a;
+  box-shadow:
+    0 0 12px rgba(236, 72, 153, 0.75),
+    0 0 20px rgba(168, 85, 247, 0.45);
+  cursor: pointer;
+}
+
+.giybet-radar-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(244, 114, 182, 0.9);
+  background: #12121a;
+  box-shadow:
+    0 0 12px rgba(236, 72, 153, 0.75),
+    0 0 20px rgba(168, 85, 247, 0.45);
+  cursor: pointer;
+}
+
+/* Capacitor / mobil güvenli alan (çentik, home bar) */
+.safe-area-padding {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
