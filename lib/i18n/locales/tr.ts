@@ -172,6 +172,7 @@ export const tr: Messages = {
     zoomForPins: "Yakınlaştır — pinler görünür",
     wideZoomHint: "Geniş görünümde harita temiz kalır. Yakınlaştırınca gıybetler belirir.",
     noGossipHere: "Bu görünümde gıybet yok. Dünya görünümüne geç veya haritayı kaydır.",
+    noFollowingPins: "Takip ettiklerinin bu alanda son 24 saatte gıybeti yok. Filtreyi kapat veya haritayı kaydır.",
     shareAtPlace: "📍 Gıybet Paylaş",
     createRoom: "Sohbet odası aç",
     roomCreating: "Oda hazırlanıyor...",

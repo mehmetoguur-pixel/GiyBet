@@ -170,6 +170,7 @@ export const en: Messages = {
     zoomForPins: "Zoom in to see pins",
     wideZoomHint: "Map stays clean at wide zoom. Zoom in to see gossip pins.",
     noGossipHere: "No gossip here. Switch to world view or pan the map.",
+    noFollowingPins: "No gossip from people you follow in this area (last 24h). Turn off the filter or pan the map.",
     shareAtPlace: "📍 Share gossip",
     createRoom: "Open chat room",
     roomCreating: "Preparing room...",

@@ -170,6 +170,7 @@ export const de: Messages = {
     zoomForPins: "Heranzoomen für Pins",
     wideZoomHint: "Karte bleibt bei weitem Zoom sauber. Heranzoomen für Klatsch-Pins.",
     noGossipHere: "Kein Klatsch hier. Weltansicht oder Karte verschieben.",
+    noFollowingPins: "Keine Klatsch von Leuten, denen du folgst, in diesem Bereich (24 Std.). Filter aus oder Karte verschieben.",
     shareAtPlace: "📍 Klatsch teilen",
     createRoom: "Chatraum öffnen",
     roomCreating: "Raum wird vorbereitet...",

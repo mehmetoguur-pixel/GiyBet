@@ -71,6 +71,15 @@ export function GiybetMap({
   const [currentZoom, setCurrentZoom] = useState(6);
   const showGossipPins = currentZoom >= MAP_GOSSIP_PINS_MIN_ZOOM;
 
+  const ensurePinZoom = useCallback((map: import("leaflet").Map) => {
+    if (map.getZoom() < MAP_GOSSIP_PINS_MIN_ZOOM) {
+      const center = userLocation
+        ? ([userLocation.lat, userLocation.lng] as [number, number])
+        : map.getCenter();
+      map.setView(center, MAP_GOSSIP_PINS_MIN_ZOOM, { animate: true });
+    }
+  }, [userLocation]);
+
   const fitMapToAllPins = useCallback(() => {
     const map = mapRef.current;
     if (!map || pins.length === 0) return;
@@ -80,14 +89,17 @@ export function GiybetMap({
     const north = Math.max(...lats);
     const west = Math.min(...lngs);
     const east = Math.max(...lngs);
+    const spread = Math.max(north - south, east - west);
+    const maxZoom = spread < 0.15 ? 14 : spread < 1 ? 12 : MAP_GOSSIP_PINS_MIN_ZOOM;
     map.fitBounds(
       [
         [south, west],
         [north, east],
       ],
-      { padding: [48, 48], maxZoom: 7, animate: true, duration: 0.75 },
+      { padding: [48, 48], maxZoom, animate: true, duration: 0.75 },
     );
-  }, [pins]);
+    map.once("moveend", () => ensurePinZoom(map));
+  }, [pins, ensurePinZoom]);
 
   useEffect(() => {
     onPinSelectRef.current = onPinSelect;
@@ -166,7 +178,11 @@ export function GiybetMap({
     if (pins.length > 0) {
       fitMapToAllPins();
     } else if (userLocation) {
-      mapRef.current.flyTo([userLocation.lat, userLocation.lng], 13, { duration: 0.75 });
+      mapRef.current.flyTo(
+        [userLocation.lat, userLocation.lng],
+        Math.max(13, MAP_GOSSIP_PINS_MIN_ZOOM),
+        { duration: 0.75 },
+      );
     }
   }, [active, mapReady, pins, userLocation, fitMapToAllPins]);
 

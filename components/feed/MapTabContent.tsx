@@ -138,7 +138,11 @@ export function MapTabContent({ feed }: { feed: FeedState }) {
         {!mapPinsVisible ? (
           <p className="mt-3 text-sm text-zinc-500">{t("map.wideZoomHint")}</p>
         ) : pinsInMapViewport.length === 0 ? (
-          <p className="mt-3 text-sm text-zinc-500">{t("map.noGossipHere")}</p>
+          <p className="mt-3 text-sm text-zinc-500">
+            {mapFollowingOnly
+              ? t("map.noFollowingPins")
+              : t("map.noGossipHere")}
+          </p>
         ) : (
           <ul className="mt-3 flex flex-col gap-2">
             {pinsInMapViewport.slice(0, 10).map((pin) => (

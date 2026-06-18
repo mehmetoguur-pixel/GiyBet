@@ -166,17 +166,23 @@ export function useMapViewport({
     });
   };
 
-  const mapDisplayPins = useMemo(() => {
-    if (mapZoom < MAP_GOSSIP_PINS_MIN_ZOOM || !mapViewportBounds) return [];
+  const mapEligiblePins = useMemo(() => {
     return mapPins
       .filter((pin) => isMapPinWithinWindow(pin.createdAt))
       .filter((pin) => !blockedAuthors.has(pin.author.trim()))
       .filter((pin) => {
         if (!mapFollowingOnly || !followingAuthors) return true;
         return followingAuthors.has(pin.author.trim());
-      })
-      .filter((pin) => isCoordInMapBounds(pin.lat, pin.lng, mapViewportBounds));
-  }, [mapPins, blockedAuthors, followingAuthors, mapFollowingOnly, mapZoom, mapViewportBounds]);
+      });
+  }, [mapPins, blockedAuthors, followingAuthors, mapFollowingOnly]);
+
+  const mapDisplayPins = useMemo(() => {
+    if (mapZoom < MAP_GOSSIP_PINS_MIN_ZOOM) return [];
+    if (!mapViewportBounds) return mapEligiblePins;
+    return mapEligiblePins.filter((pin) =>
+      isCoordInMapBounds(pin.lat, pin.lng, mapViewportBounds),
+    );
+  }, [mapEligiblePins, mapZoom, mapViewportBounds]);
 
   useEffect(() => {
     if (!selectedMapPin) return;
