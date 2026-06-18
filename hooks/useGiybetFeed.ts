@@ -210,18 +210,20 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   const likersModalPost = posts.find((p) => p.id === likersModalPostId);
 
   const filteredPosts = useMemo(() => {
+    const trimmedNickname = nickname.trim();
     let list = posts.filter((p) => !blockedAuthors.has(p.author.trim()));
     if (activeTagFilter) {
       list = list.filter((p) => postHasTag(p, activeTagFilter));
     }
     if (geo.geoCoords) {
       list = list.filter((p) => {
+        if (trimmedNickname && p.author.trim() === trimmedNickname) return true;
         const d = resolvePostDistanceMeters(p, geo.geoCoords!);
         return d != null && d <= radarRadiusMeters;
       });
     }
     return list;
-  }, [posts, blockedAuthors, geo.geoCoords, activeTagFilter, radarRadiusMeters]);
+  }, [posts, blockedAuthors, geo.geoCoords, activeTagFilter, radarRadiusMeters, nickname]);
 
   const followingFilteredPosts = useMemo(() => {
     let list = posts.filter(
