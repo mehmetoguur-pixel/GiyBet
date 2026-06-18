@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useI18n } from "@/lib/i18n/provider";
 import { buildAuthorReactionScores, sumPostReactions } from "@/lib/feed/rank";
 import { RADAR_DEFAULT_METERS } from "@/lib/feed/format";
@@ -86,10 +86,13 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     }
   }, [initialGossipId, posts]);
 
+  const handleOpenMap = useCallback(() => setFeedTab("map"), []);
+  const handleSelectFollowingTab = useCallback(() => setFeedTab("following"), []);
+
   const geo = useFeedGeo({
     nominatimLanguage,
     t,
-    onOpenMap: () => setFeedTab("map"),
+    onOpenMap: handleOpenMap,
   });
 
   const map = useMapViewport({
@@ -117,7 +120,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     posts,
     gossipChatLabels: gossipChat.gossipChatLabels,
     onSelectGossip: gossipChat.openGossipChatFromNotification,
-    onSelectFollow: () => setFeedTab("following"),
+    onSelectFollow: handleSelectFollowingTab,
   });
 
   const report = useReportFlow({

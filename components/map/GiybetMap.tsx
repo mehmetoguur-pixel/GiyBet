@@ -68,6 +68,11 @@ export function GiybetMap({
   const hasInitialFitRef = useRef(false);
   const prevPinCountRef = useRef(0);
   const hasDensePinFitRef = useRef(false);
+  const pinsRef = useRef(pins);
+  pinsRef.current = pins;
+  const lastEmittedViewRef = useRef<{ zoom: number; north: number; east: number; south: number; west: number } | null>(
+    null,
+  );
   const [mapReady, setMapReady] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(6);
   const showGossipPins = currentZoom >= MAP_GOSSIP_PINS_MIN_ZOOM;
@@ -83,9 +88,10 @@ export function GiybetMap({
 
   const fitMapToAllPins = useCallback(() => {
     const map = mapRef.current;
-    if (!map || pins.length === 0) return;
-    const lats = pins.map((p) => p.lat);
-    const lngs = pins.map((p) => p.lng);
+    const fitPins = pinsRef.current;
+    if (!map || fitPins.length === 0) return;
+    const lats = fitPins.map((p) => p.lat);
+    const lngs = fitPins.map((p) => p.lng);
     const south = Math.min(...lats);
     const north = Math.max(...lats);
     const west = Math.min(...lngs);
@@ -102,7 +108,7 @@ export function GiybetMap({
     map.once("moveend", () => {
       ensurePinZoom(map);
     });
-  }, [pins, ensurePinZoom]);
+  }, [ensurePinZoom]);
 
   useEffect(() => {
     onPinSelectRef.current = onPinSelect;
@@ -178,7 +184,7 @@ export function GiybetMap({
   useEffect(() => {
     if (!active || !mapReady || !mapRef.current || hasInitialFitRef.current) return;
     hasInitialFitRef.current = true;
-    if (pins.length > 0) {
+    if (pinsRef.current.length > 0) {
       fitMapToAllPins();
     } else if (userLocation) {
       mapRef.current.flyTo(
@@ -187,7 +193,7 @@ export function GiybetMap({
         { duration: 0.75 },
       );
     }
-  }, [active, mapReady, pins, userLocation, fitMapToAllPins]);
+  }, [active, mapReady, pins.length, userLocation, fitMapToAllPins]);
 
   useEffect(() => {
     if (!active || !mapReady || !mapRef.current || !flyTarget) return;
@@ -217,16 +223,24 @@ export function GiybetMap({
     const emitView = () => {
       const bounds = map.getBounds();
       const zoom = map.getZoom();
+      const north = bounds.getNorth();
+      const east = bounds.getEast();
+      const south = bounds.getSouth();
+      const west = bounds.getWest();
+      const last = lastEmittedViewRef.current;
+      if (
+        last &&
+        last.zoom === zoom &&
+        last.north === north &&
+        last.east === east &&
+        last.south === south &&
+        last.west === west
+      ) {
+        return;
+      }
+      lastEmittedViewRef.current = { zoom, north, east, south, west };
       setCurrentZoom((prev) => (prev === zoom ? prev : zoom));
-      onBoundsChangeRef.current(
-        {
-          north: bounds.getNorth(),
-          east: bounds.getEast(),
-          south: bounds.getSouth(),
-          west: bounds.getWest(),
-        },
-        zoom,
-      );
+      onBoundsChangeRef.current({ north, east, south, west }, zoom);
     };
 
     const handleMapClick = (event: import("leaflet").LeafletMouseEvent) => {
@@ -354,6 +368,10 @@ export function GiybetMap({
 
   useEffect(() => {
     if (!active) {
+      hasInitialFitRef.current = false;
+      hasDensePinFitRef.current = false;
+      prevPinCountRef.current = 0;
+      lastEmittedViewRef.current = null;
       queueMicrotask(() => setMapReady(false));
     }
     return () => {
