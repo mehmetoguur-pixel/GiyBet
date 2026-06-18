@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import {
-  fetchNotificationPreferences,
   saveNotificationPreferences,
   type NotificationPreferences,
 } from "@/lib/notification-preferences";
@@ -21,7 +20,24 @@ export function NotificationPreferencesPanel({ nickname }: { nickname: string })
 
   useEffect(() => {
     if (!nickname.trim()) return;
-    fetchNotificationPreferences(nickname).then(setPrefs);
+    void supabase.auth.getSession().then(({ data }) => {
+      const token = data.session?.access_token;
+      if (!token) return;
+      fetch("/api/notification-preferences", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data) return;
+          setPrefs({
+            muteLike: data.muteLike ?? false,
+            muteComment: data.muteComment ?? false,
+            muteReaction: data.muteReaction ?? false,
+            muteFollow: data.muteFollow ?? false,
+          });
+        })
+        .catch(() => {});
+    });
   }, [nickname]);
 
   const toggle = async (key: keyof NotificationPreferences) => {

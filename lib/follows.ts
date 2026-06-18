@@ -65,21 +65,20 @@ export async function fetchFollowCountsByUsername(
   const trimmed = username.trim();
   if (!trimmed) return { followers: 0, following: 0 };
 
-  const [followingRes, followersRes] = await Promise.all([
-    supabase
-      .from("user_follows")
-      .select("*", { count: "exact", head: true })
-      .eq("follower_username", trimmed),
-    supabase
-      .from("user_follows")
-      .select("*", { count: "exact", head: true })
-      .eq("followed_username", trimmed),
-  ]);
-
-  return {
-    following: followingRes.count ?? 0,
-    followers: followersRes.count ?? 0,
-  };
+  try {
+    const res = await fetch(
+      `/api/follows?username=${encodeURIComponent(trimmed)}`,
+      { cache: "no-store" },
+    );
+    if (!res.ok) return { followers: 0, following: 0 };
+    const data = (await res.json()) as { followers?: number; following?: number };
+    return {
+      followers: data.followers ?? 0,
+      following: data.following ?? 0,
+    };
+  } catch {
+    return { followers: 0, following: 0 };
+  }
 }
 
 export async function fetchFollowCounts(

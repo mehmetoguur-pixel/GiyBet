@@ -18,6 +18,35 @@ function followGossipId(userId: string): string {
   return `follow-${userId}`;
 }
 
+/** Herkese açık takip sayıları */
+export async function GET(request: NextRequest) {
+  const username = request.nextUrl.searchParams.get("username")?.trim() ?? "";
+  if (!isValidUsername(username)) {
+    return NextResponse.json({ error: "invalid_username" }, { status: 400 });
+  }
+
+  const admin = getAdminClient();
+  if (!admin) {
+    return NextResponse.json({ followers: 0, following: 0 });
+  }
+
+  const [followingRes, followersRes] = await Promise.all([
+    admin
+      .from("user_follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_username", username),
+    admin
+      .from("user_follows")
+      .select("*", { count: "exact", head: true })
+      .eq("followed_username", username),
+  ]);
+
+  return NextResponse.json({
+    followers: followersRes.count ?? 0,
+    following: followingRes.count ?? 0,
+  });
+}
+
 /** Takip et — service_role insert, bildirim gönder */
 export async function POST(request: NextRequest) {
   const user = await getSessionUser(request);

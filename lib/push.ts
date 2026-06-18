@@ -1,4 +1,5 @@
 import { registerDeviceToken } from "./moderation";
+import { supabase } from "./supabase";
 
 /** Push bildirim altyapısı — web için foundation; native plugin ileride eklenebilir. */
 export async function initPushNotifications(userId: string): Promise<void> {
@@ -6,6 +7,9 @@ export async function initPushNotifications(userId: string): Promise<void> {
 
   try {
     if (!("Notification" in window)) return;
+
+    const { data } = await supabase.auth.getSession();
+    if (!data.session || data.session.user.id !== userId) return;
 
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return;

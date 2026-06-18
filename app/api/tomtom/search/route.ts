@@ -67,10 +67,7 @@ export async function GET(request: NextRequest) {
 
   const key = getTomTomKey();
   if (!key) {
-    return NextResponse.json(
-      { error: "TomTom API anahtarı yapılandırılmamış." },
-      { status: 503 },
-    );
+    return NextResponse.json({ results: [] });
   }
 
   const langParam = request.nextUrl.searchParams.get("lang");

@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  fetchTomTomAutocomplete,
+  fetchTomTomNearbyPlaces,
+} from "@/lib/places/tomtom-nearby";
 
 const GOOGLE_BASE = "https://maps.googleapis.com/maps/api/place";
 
@@ -59,17 +63,76 @@ async function googleGet<T>(url: string): Promise<T> {
 }
 
 export async function GET(request: NextRequest) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "GOOGLE_PLACES_API_KEY tanımlı değil. .env.local dosyasına ekleyin." },
-      { status: 503 },
-    );
-  }
-
   const { searchParams } = request.nextUrl;
   const type = searchParams.get("type");
   const lang = searchParams.get("lang")?.startsWith("tr") ? "tr" : "en";
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    if (type === "nearby") {
+      const north = searchParams.get("north");
+      const east = searchParams.get("east");
+      const south = searchParams.get("south");
+      const west = searchParams.get("west");
+
+      let lat: number;
+      let lng: number;
+      let radius: number;
+
+      if (north && east && south && west) {
+        const n = Number(north);
+        const e = Number(east);
+        const s = Number(south);
+        const w = Number(west);
+        lat = (n + s) / 2;
+        lng = (e + w) / 2;
+        const cornerDistance = haversineMeters(n, e, s, w);
+        radius = Math.min(Math.max(Math.round(cornerDistance / 2), 400), 8000);
+      } else {
+        lat = Number(searchParams.get("lat"));
+        lng = Number(searchParams.get("lng"));
+        radius = Math.min(Number(searchParams.get("radius") ?? 1200), 8000);
+      }
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return NextResponse.json({ error: "Geçerli konum gerekli." }, { status: 400 });
+      }
+
+      const places = await fetchTomTomNearbyPlaces(lat, lng, radius, lang);
+      return NextResponse.json({ places });
+    }
+
+    if (type === "autocomplete") {
+      const input = searchParams.get("input")?.trim() ?? "";
+      const lat = searchParams.get("lat");
+      const lng = searchParams.get("lng");
+      const suggestions = await fetchTomTomAutocomplete(
+        input,
+        lat != null ? Number(lat) : undefined,
+        lng != null ? Number(lng) : undefined,
+        lang,
+      );
+      return NextResponse.json({ suggestions });
+    }
+
+    if (type === "details") {
+      const placeId = searchParams.get("placeId");
+      if (placeId?.startsWith("tomtom:")) {
+        return NextResponse.json({
+          place: {
+            placeId,
+            name: "Mekan",
+            lat: Number(searchParams.get("lat") ?? 0),
+            lng: Number(searchParams.get("lng") ?? 0),
+            address: "",
+            types: [],
+          },
+        });
+      }
+    }
+
+    return NextResponse.json({ places: [], suggestions: [] });
+  }
 
   try {
     if (type === "autocomplete") {
