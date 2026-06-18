@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeAvatar } from "@/lib/avatar";
 import { formatFeedCityLabel, formatLocationLabel, mockDistrictForCity, randomPostDistance } from "@/lib/feed/format";
 import { extractHashtags, mergeTags, parseGossipTags } from "@/lib/feed/tags";
 import { reactionLabel } from "@/lib/gossip/api";
 import {
+  enrichPostsWithComments,
   fetchGossipsFromSupabase,
   insertCommentToSupabase,
   notifyPostAuthor,
@@ -20,7 +21,7 @@ import {
   resolveGossipLocation,
 } from "@/lib/gossip/parsers";
 import { gossipRowToFeedPost } from "@/lib/gossip/transform";
-import { detectCityFromCoords, resolveShareLocationAtCoords } from "@/lib/geo";
+import { detectCityFromCoords, buildShareLocationFast } from "@/lib/geo";
 import { gossipChatLabel } from "@/lib/rooms/chat-utils";
 import {
   createRoomForGossip,
@@ -32,6 +33,7 @@ import {
 import { deleteOwnGossip, GOSSIP_RATE_LIMIT, isRateLimitError } from "@/lib/moderation";
 import { isBanError } from "@/lib/rate-limit";
 import { getLocalizedString } from "@/lib/i18n";
+import { useFeedRealtime } from "@/hooks/feed/useFeedRealtime";
 import { supabase } from "@/lib/supabase";
 import type { PlaceDetail } from "@/lib/places-api";
 import type {
@@ -54,7 +56,6 @@ type UseFeedActionsOptions = {
   nickname: string;
   avatarCreator: AvatarCreatorConfig;
   registeredUser: RegisteredUser | null;
-  nominatimLanguage: string;
   t: (key: string, params?: Record<string, string | number>) => string;
   onLogout: () => void;
 };
@@ -64,7 +65,6 @@ export function useFeedActions({
   nickname,
   avatarCreator,
   registeredUser,
-  nominatimLanguage,
   t,
   onLogout,
 }: UseFeedActionsOptions) {
@@ -73,6 +73,21 @@ export function useFeedActions({
   const [mapRooms, setMapRooms] = useState<MapRoom[]>([]);
   const [engagementToast, setEngagementToast] = useState<string | null>(null);
   const lastShareAtRef = useRef(0);
+  const refreshInFlightRef = useRef(false);
+
+  const refreshFeed = useCallback(async () => {
+    if (refreshInFlightRef.current) return;
+    refreshInFlightRef.current = true;
+    try {
+      const { posts, pins } = await fetchGossipsFromSupabase(nickname);
+      setFeedPosts(posts);
+      setMapPins(pins);
+      const withComments = await enrichPostsWithComments(posts);
+      setFeedPosts(withComments);
+    } finally {
+      refreshInFlightRef.current = false;
+    }
+  }, [nickname]);
 
   useEffect(() => {
     if (!engagementToast) return;
@@ -85,10 +100,8 @@ export function useFeedActions({
 
     let cancelled = false;
 
-    fetchGossipsFromSupabase(nickname).then(({ posts, pins }) => {
+    refreshFeed().then(() => {
       if (cancelled) return;
-      setFeedPosts(posts);
-      setMapPins(pins);
     });
 
     fetchRoomsFromSupabase().then((rooms) => {
@@ -98,7 +111,15 @@ export function useFeedActions({
     return () => {
       cancelled = true;
     };
-  }, [onFeed, nickname]);
+  }, [onFeed, refreshFeed]);
+
+  useFeedRealtime({
+    enabled: onFeed,
+    nickname,
+    setFeedPosts,
+    setMapPins,
+    onRefresh: refreshFeed,
+  });
 
   const clearFeedData = () => {
     setFeedPosts([]);
@@ -210,11 +231,10 @@ export function useFeedActions({
             ...(payload.venue ? { venue: payload.venue } : {}),
           }
         : location.hasUserCoords
-          ? await resolveShareLocationAtCoords(location.lat, location.lng, {
+          ? buildShareLocationFast(location.lat, location.lng, {
               city: location.feedCity,
               venue: payload.venue,
               manualDistrict: payload.district,
-              language: nominatimLanguage,
             })
           : null;
 
@@ -284,6 +304,7 @@ export function useFeedActions({
       gossipId,
       { lat: location.lat, lng: location.lng, city: location.city },
       trimmedText || "📷",
+      { skipExistingLookup: true },
     );
 
     await supabase.from("gossips").update({ room_id: linkedRoom.id }).eq("id", row.id);

@@ -55,12 +55,18 @@ export function useFeedNotifications({
     void Promise.resolve().then(() => {
       if (!cancelled) void loadAuthorNotifications();
     });
-    const channel = subscribeNotifications(nickname.trim(), loadAuthorNotifications);
-    const intervalId = window.setInterval(loadAuthorNotifications, 60000);
+    const trimmed = nickname.trim();
+    const channel = subscribeNotifications(trimmed, loadAuthorNotifications);
+    const intervalId = window.setInterval(loadAuthorNotifications, 15_000);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") loadAuthorNotifications();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       cancelled = true;
       unsubscribeChannel(channel);
       window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [nickname, loadAuthorNotifications]);
 

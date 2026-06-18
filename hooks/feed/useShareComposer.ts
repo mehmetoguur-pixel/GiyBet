@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { reverseGeocodeNominatim } from "@/lib/nominatim-api";
 import {
   formatFeedCityLabel,
   mockDistrictForCity,
@@ -9,10 +8,10 @@ import {
 } from "@/lib/feed/format";
 import { extractHashtags } from "@/lib/feed/tags";
 import {
+  buildShareLocationFast,
   detectCityFromCoords,
   ensureCoordsForShare,
   haversineDistanceMeters,
-  resolveShareLocationAtCoords,
 } from "@/lib/geo";
 import type { PlaceDetail } from "@/lib/places-api";
 import type {
@@ -24,7 +23,6 @@ import type {
 
 type UseShareComposerOptions = {
   t: (key: string, params?: Record<string, string>) => string;
-  nominatimLanguage: string;
   geoCoords: GeoCoords | null;
   setGeoCoords: (coords: GeoCoords) => void;
   setUserCity: (city: string | null) => void;
@@ -38,7 +36,6 @@ type UseShareComposerOptions = {
 
 export function useShareComposer({
   t,
-  nominatimLanguage,
   geoCoords,
   setGeoCoords,
   setUserCity,
@@ -71,29 +68,21 @@ export function useShareComposer({
   };
 
   useEffect(() => {
-    let cancelled = false;
-
     const lat = selectedFeedPlace?.lat ?? geoCoords?.lat;
     const lng = selectedFeedPlace?.lng ?? geoCoords?.lng;
     if (lat == null || lng == null) {
-      queueMicrotask(() => setShareLocationPreview(""));
+      setShareLocationPreview("");
       return;
     }
 
     const city = detectCityFromCoords(lat, lng);
-    resolveShareLocationAtCoords(lat, lng, {
+    const loc = buildShareLocationFast(lat, lng, {
       city,
       venue: selectedFeedPlace?.name,
       manualDistrict: selectedFeedPlace ? mockDistrictForCity(city) : undefined,
-      language: nominatimLanguage,
-    }).then((loc) => {
-      if (!cancelled) setShareLocationPreview(loc.locationLabel);
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [geoCoords, selectedFeedPlace, nominatimLanguage]);
+    setShareLocationPreview(loc.locationLabel);
+  }, [geoCoords, selectedFeedPlace]);
 
   const handleShareImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,28 +116,20 @@ export function useShareComposer({
         return;
       }
 
-      if (!sharePlace) {
+      if (!sharePlace && shareCoords) {
         setGeoCoords(shareCoords);
-        const geocoded = await reverseGeocodeNominatim(
-          shareCoords.lat,
-          shareCoords.lng,
-          nominatimLanguage,
-        );
         setUserCity(
-          geocoded?.cityLabel ||
-            formatFeedCityLabel(detectCityFromCoords(shareCoords.lat, shareCoords.lng)) ||
-            null,
+          formatFeedCityLabel(detectCityFromCoords(shareCoords.lat, shareCoords.lng)) ?? null,
         );
         setGeoStatus("success");
       }
 
       const shareCity = detectCityFromCoords(shareCoords.lat, shareCoords.lng);
 
-      const shareLocation = await resolveShareLocationAtCoords(shareCoords.lat, shareCoords.lng, {
+      const shareLocation = buildShareLocationFast(shareCoords.lat, shareCoords.lng, {
         city: shareCity,
         venue: sharePlace?.name,
         manualDistrict: sharePlace ? mockDistrictForCity(shareCity) : undefined,
-        language: nominatimLanguage,
       });
 
       const result = await handleShareWithChat({

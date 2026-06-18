@@ -253,6 +253,7 @@ export const ar: Messages = {
       other: "أخرى",
     },
     failed: "تعذّر إرسال البلاغ.",
+    serverNotConfigured: "نظام البلاغات غير مُعد. حاول لاحقاً.",
     alreadyReported: "أبلغت عن هذا المنشور مسبقاً.",
     selfReport: "لا يمكنك الإبلاغ عن منشورك.",
   },

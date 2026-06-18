@@ -18,7 +18,7 @@ type UseFeedGeoOptions = {
 };
 
 export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOptions) {
-  const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("loading");
+  const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [geoError, setGeoError] = useState("");
   const [geoCoords, setGeoCoords] = useState<GeoCoords | null>(null);
   const [nearbyVenues, setNearbyVenues] = useState<NearbyVenue[]>([]);
@@ -27,16 +27,19 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
   const applyUserLocation = useCallback(
     async (coords: GeoCoords, openMap = false) => {
       setGeoCoords(coords);
-      const geocoded = await reverseGeocodeNominatim(coords.lat, coords.lng, nominatimLanguage);
-      setUserCity(
-        geocoded?.cityLabel ||
-          formatFeedCityLabel(detectCityFromCoords(coords.lat, coords.lng)) ||
-          null,
-      );
+      const fastCity =
+        formatFeedCityLabel(detectCityFromCoords(coords.lat, coords.lng)) ?? null;
+      setUserCity(fastCity);
       setGeoStatus("success");
       setGeoError("");
       setNearbyVenues(getNearbyVenues(coords.lat, coords.lng));
       if (openMap) onOpenMap?.();
+
+      void reverseGeocodeNominatim(coords.lat, coords.lng, nominatimLanguage).then(
+        (geocoded) => {
+          if (geocoded?.cityLabel) setUserCity(geocoded.cityLabel);
+        },
+      );
     },
     [nominatimLanguage, onOpenMap],
   );
@@ -44,6 +47,7 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
   useEffect(() => {
     let cancelled = false;
 
+    setGeoStatus("loading");
     requestGeolocation()
       .then((coords) => {
         if (!cancelled) applyUserLocation(coords);
@@ -79,7 +83,7 @@ export function useFeedGeo({ nominatimLanguage, t, onOpenMap }: UseFeedGeoOption
 
     setGeoStatus("loading");
     try {
-      const coords = await requestGeolocation();
+      const coords = await requestGeolocation({ highAccuracy: true });
       applyUserLocation(coords, true);
     } catch {
       setGeoStatus("error");

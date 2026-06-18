@@ -256,6 +256,7 @@ export const tr: Messages = {
       other: "Diğer",
     },
     failed: "Şikayet gönderilemedi.",
+    serverNotConfigured: "Şikayet sistemi yapılandırılmamış. Daha sonra tekrar dene.",
     alreadyReported: "Bu gönderiyi zaten şikayet ettin.",
     selfReport: "Kendi gönderini şikayet edemezsin.",
   },

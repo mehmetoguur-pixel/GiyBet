@@ -91,13 +91,23 @@ async function main() {
       () => {},
     );
 
+  const gossipChannel = supabase
+    .channel("check-gossips")
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "gossips" },
+      () => {},
+    );
+
   const chat = await waitForChannelStatus("gossip_chat_messages", chatChannel);
   const notif = await waitForChannelStatus("notifications", notifChannel);
+  const gossip = await waitForChannelStatus("gossips", gossipChannel);
 
   console.log(`  ${chat.status}`);
   console.log(`  ${notif.status}`);
+  console.log(`  ${gossip.status}`);
 
-  const allOk = chat.ok && notif.ok;
+  const allOk = chat.ok && notif.ok && gossip.ok;
   console.log(allOk ? "\n✓ Realtime görünüşe göre çalışıyor." : "\n✗ Realtime tam bağlanmadı — Replication toggle’larını kontrol et.");
   process.exit(allOk ? 0 : 1);
 }

@@ -9,7 +9,7 @@ import { RankBadge } from "@/components/feed/RankBadge";
 export function MapPinDetailModal({
   pin,
   post,
-  nickname: _nickname,
+  nickname,
   avatar,
   authorReactionScores,
   onAddComment,
@@ -37,6 +37,7 @@ export function MapPinDetailModal({
   };
 
   const authorScore = authorReactionScores[post.author] ?? 0;
+  const isOwner = post.author === nickname.trim();
 
   return (
     <>
@@ -63,15 +64,17 @@ export function MapPinDetailModal({
               <p className="mt-0.5 truncate text-[10px] text-zinc-500">{pin.location}</p>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => onReport(post.id)}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-red-500/55 bg-red-950/40 text-xs shadow-[0_0_12px_rgba(239,68,68,0.35)] transition-all hover:border-red-400/70 hover:text-red-200 active:scale-95"
-                aria-label={t("common.report")}
-                title={t("common.report")}
-              >
-                🚨
-              </button>
+              {!isOwner && (
+                <button
+                  type="button"
+                  onClick={() => onReport(post.id)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-red-500/55 bg-red-950/40 text-xs shadow-[0_0_12px_rgba(239,68,68,0.35)] transition-all hover:border-red-400/70 hover:text-red-200 active:scale-95"
+                  aria-label={t("common.report")}
+                  title={t("common.report")}
+                >
+                  🚨
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onClose}

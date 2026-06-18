@@ -27,5 +27,6 @@ export function isValidGossipId(id: string): boolean {
 
 export function isValidUsername(username: string): boolean {
   if (!username || username.length > REPORT_LIMITS.maxUsernameLength) return false;
-  return /^[a-zA-Z0-9_.-]+$/.test(username);
+  // Gıybet adı kurallarıyla uyumlu (Türkçe harfler dahil)
+  return /^[a-zA-Z0-9_ğüşıöçĞÜŞİÖÇ.-]+$/.test(username);
 }

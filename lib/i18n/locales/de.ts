@@ -253,6 +253,7 @@ export const de: Messages = {
       other: "Sonstiges",
     },
     failed: "Meldung konnte nicht gesendet werden.",
+    serverNotConfigured: "Meldungssystem nicht konfiguriert. Bitte später erneut versuchen.",
     alreadyReported: "Diesen Beitrag hast du bereits gemeldet.",
     selfReport: "Eigene Beiträge können nicht gemeldet werden.",
   },

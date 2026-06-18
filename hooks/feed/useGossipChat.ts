@@ -95,18 +95,17 @@ export function useGossipChat({ nickname, avatar, posts, onShare }: UseGossipCha
     };
   }, [gossipChatModalOpen, currentFocusedGossipId, loadGossipChatMessages]);
 
-  const openGossipChat = async (gossipId: string, label: string) => {
+  const openGossipChat = (gossipId: string, label: string) => {
     const gid = normalizeGossipId(gossipId);
     setGossipChatLabels((prev) => ({ ...prev, [gid]: label }));
     setGossipChatError("");
-
-    await loadGossipChatMessages(gid);
 
     const current = activeGossipChatsRef.current;
     if (current.includes(gid)) {
       setCurrentFocusedGossipId(gid);
       clearGossipChatFlash();
       setGossipChatModalOpen(true);
+      void loadGossipChatMessages(gid);
       return;
     }
     if (current.length >= MAX_VENUE_ROOMS) {
@@ -125,29 +124,27 @@ export function useGossipChat({ nickname, avatar, posts, onShare }: UseGossipCha
     setCurrentFocusedGossipId(gid);
     clearGossipChatFlash();
     setGossipChatModalOpen(true);
+    void loadGossipChatMessages(gid);
   };
 
   const handleShareWithChat = async (payload: ShareCheckIn): Promise<ShareSuccessResult | void> => {
     const result = await onShare(payload);
     if (result?.chatGossipId) {
       const gid = normalizeGossipId(result.chatGossipId);
-      await openGossipChat(gid, result.chatLabel);
+      openGossipChat(gid, result.chatLabel);
       const sharePreview =
         payload.text.trim() ||
         (payload.imageFile || payload.imageUrl ? "📷 Fotoğraf paylaştı" : "");
       if (sharePreview) {
-        const { message: persisted, error: sendError } = await insertGossipChatMessage(
-          gid,
-          nickname,
-          sharePreview,
-        );
-        if (sendError) setGossipChatError(sendError);
-        if (persisted) {
-          setGossipChatMessages((prev) => ({
-            ...prev,
-            [gid]: [...(prev[gid] ?? []), persisted],
-          }));
-        }
+        void insertGossipChatMessage(gid, nickname, sharePreview).then(({ message: persisted, error: sendError }) => {
+          if (sendError) setGossipChatError(sendError);
+          if (persisted) {
+            setGossipChatMessages((prev) => ({
+              ...prev,
+              [gid]: [...(prev[gid] ?? []), persisted],
+            }));
+          }
+        });
       }
     }
     return result;

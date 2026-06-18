@@ -196,6 +196,7 @@ export type GossipRow = {
   district?: string | null;
   venue_name?: string | null;
   tags?: string[] | null;
+  deleted_at?: string | null;
 };
 export type CommentRow = {
   id: string;

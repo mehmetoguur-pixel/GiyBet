@@ -87,18 +87,15 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   });
 
   const report = useReportFlow({
-    userId,
     nickname,
     posts,
     t,
-    onReportError: gossipChat.setGossipChatError,
     selectedMapPin: map.selectedMapPin,
     setSelectedMapPin: map.setSelectedMapPin,
   });
 
   const share = useShareComposer({
     t,
-    nominatimLanguage,
     geoCoords: geo.geoCoords,
     setGeoCoords: geo.setGeoCoords,
     setUserCity: geo.setUserCity,
@@ -203,6 +200,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     gossipChatError: gossipChat.gossipChatError,
     roomLimitAlert: gossipChat.roomLimitAlert,
     showReportToast: report.showReportToast,
+    reportError: report.reportError,
     reportTarget: report.reportTarget,
     setReportTarget: report.setReportTarget,
     bellNotifications: notifications.bellNotifications,

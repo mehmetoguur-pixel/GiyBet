@@ -83,7 +83,7 @@ export function getNearbyVenues(lat: number, lng: number, limit = 6): NearbyVenu
   return result;
 }
 
-export function requestGeolocation(): Promise<GeoCoords> {
+export function requestGeolocation(options?: { highAccuracy?: boolean }): Promise<GeoCoords> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error("Tarayıcın konum özelliğini desteklemiyor."));
@@ -96,9 +96,36 @@ export function requestGeolocation(): Promise<GeoCoords> {
           lng: pos.coords.longitude,
         }),
       (err) => reject(err),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      {
+        enableHighAccuracy: options?.highAccuracy ?? false,
+        timeout: 8000,
+        maximumAge: 120000,
+      },
     );
   });
+}
+
+/** Ağ çağrısı olmadan konum etiketi — paylaşım ve önizleme için */
+export function buildShareLocationFast(
+  lat: number,
+  lng: number,
+  options?: { city?: City; venue?: string; manualDistrict?: string },
+): ShareLocationFields {
+  const feedCity: City = options?.city ?? detectCityFromCoords(lat, lng);
+  const cityLabel = formatFeedCityLabel(feedCity) ?? feedCity;
+  const district = options?.manualDistrict?.trim() || mockDistrictForCity(feedCity);
+  const venue = options?.venue?.trim();
+  const locationLabel =
+    formatLocationLabel({ city: feedCity, cityLabel, district, venue }) ??
+    `${cityLabel} - ${district}`;
+
+  return {
+    city: feedCity,
+    cityLabel,
+    district,
+    locationLabel,
+    ...(venue ? { venue } : {}),
+  };
 }
 export async function resolveShareLocationAtCoords(
   lat: number,
@@ -154,10 +181,14 @@ export async function ensureCoordsForShare(
     return { lat: sharePlace.lat, lng: sharePlace.lng };
   }
 
+  if (geoCoords && !isDefaultGossipCoords(geoCoords)) {
+    return geoCoords;
+  }
+
   try {
     return await requestGeolocation();
   } catch {
-    if (geoCoords && !isDefaultGossipCoords(geoCoords)) return geoCoords;
+    if (geoCoords) return geoCoords;
     return null;
   }
 }

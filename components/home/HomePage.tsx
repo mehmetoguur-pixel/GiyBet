@@ -1,6 +1,6 @@
 "use client";
 
-import GiybetFeed from "@/components/feed/GiybetFeed";
+import dynamic from "next/dynamic";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPasswordModal";
 import { AuthForms } from "@/components/home/AuthForms";
 import { HomeFooter } from "@/components/home/HomeFooter";
@@ -15,8 +15,16 @@ import {
 import { saveRegisteredUser } from "@/lib/auth/profile";
 import { useI18n } from "@/lib/i18n/provider";
 
+const GiybetFeed = dynamic(() => import("@/components/feed/GiybetFeed"), {
+  loading: () => (
+    <div className="flex min-h-[40vh] items-center justify-center text-sm text-zinc-500">
+      …
+    </div>
+  ),
+});
+
 export default function Home() {
-  const { t, nominatimLanguage } = useI18n();
+  const { t } = useI18n();
   const auth = useHomeAuth({ t });
 
   const feed = useFeedActions({
@@ -24,7 +32,6 @@ export default function Home() {
     nickname: auth.nickname,
     avatarCreator: auth.avatarCreator,
     registeredUser: auth.registeredUser,
-    nominatimLanguage,
     t,
     onLogout: () => {
       saveRegisteredUser(null);

@@ -9,7 +9,7 @@ import type {
   MapPin,
   ReactionKey,
 } from "@/lib/giybet/types";
-import { GOSSIP_IMAGE_BUCKET, NOTIFICATION_LIST_LIMIT } from "./constants";
+import { GOSSIP_FEED_LIMIT, GOSSIP_IMAGE_BUCKET, NOTIFICATION_LIST_LIMIT } from "./constants";
 import {
   applyCommentsToPost,
   commentRowToComment,
@@ -110,32 +110,46 @@ export async function fetchCommentsByGossipIds(gossipIds: string[]): Promise<Map
   }
   return map;
 }
-export async function fetchGossipsFromSupabase(currentUsername = ""): Promise<{ posts: FeedPost[]; pins: MapPin[] }> {
+export async function fetchGossipsFromSupabase(currentUsername = ""): Promise<{
+  posts: FeedPost[];
+  pins: MapPin[];
+  gossipIds: string[];
+}> {
   const locale = resolveStoredLocale() ?? detectDeviceLocale();
   const { data, error } = await supabase
     .from("gossips")
     .select("*")
-    .order("created_at", { ascending: false });
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(GOSSIP_FEED_LIMIT);
 
   if (error || !data?.length) {
-    return { posts: [], pins: [] };
+    return { posts: [], pins: [], gossipIds: [] };
   }
-
-  const gossipIds = data.map((raw) => normalizeGossipId((raw as GossipRow).id));
-  const commentsMap = await fetchCommentsByGossipIds(gossipIds);
 
   const posts: FeedPost[] = [];
   const pins: MapPin[] = [];
+  const gossipIds: string[] = [];
 
   for (const raw of data) {
-    const row = raw as GossipRow & { deleted_at?: string | null };
-    if (row.deleted_at) continue;
-    const post = applyCommentsToPost(gossipRowToFeedPost(row, currentUsername, locale), commentsMap);
+    const row = raw as GossipRow;
+    const post = gossipRowToFeedPost(row, currentUsername, locale);
     posts.push(post);
     pins.push(gossipRowToMapPin(row, post.id, post.author, post.avatar));
+    gossipIds.push(normalizeGossipId(row.id));
   }
 
-  return { posts, pins };
+  return { posts, pins, gossipIds };
+}
+
+/** Yorumları arka planda yükle — feed önce görünür */
+export async function enrichPostsWithComments(posts: FeedPost[]): Promise<FeedPost[]> {
+  const gossipIds = posts
+    .map((p) => (p.gossipId ? normalizeGossipId(p.gossipId) : ""))
+    .filter(Boolean);
+  if (!gossipIds.length) return posts;
+  const commentsMap = await fetchCommentsByGossipIds(gossipIds);
+  return posts.map((post) => applyCommentsToPost(post, commentsMap));
 }
 export async function fetchAuthorNotifications(recipient: string): Promise<{
   items: BellNotification[];

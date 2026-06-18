@@ -78,18 +78,20 @@ export function GiybetCard({
             🗑
           </button>
         )}
-        <button
-          type="button"
-          onClick={() => {
-            setShowActionsMenu(false);
-            onOpenReport(post.id);
-          }}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-red-500/55 bg-red-950/50 text-xs shadow-[0_0_12px_rgba(239,68,68,0.4)] transition-all hover:border-red-400/70 hover:bg-red-950/70 active:scale-95"
-          aria-label={t("common.report")}
-          title={t("common.report")}
-        >
-          🚨
-        </button>
+        {!isOwner && (
+          <button
+            type="button"
+            onClick={() => {
+              setShowActionsMenu(false);
+              onOpenReport(post.id);
+            }}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-red-500/55 bg-red-950/50 text-xs shadow-[0_0_12px_rgba(239,68,68,0.4)] transition-all hover:border-red-400/70 hover:bg-red-950/70 active:scale-95"
+            aria-label={t("common.report")}
+            title={t("common.report")}
+          >
+            🚨
+          </button>
+        )}
         {!isOwner && onBlockUser && (
           <div className="relative">
             <button
@@ -168,6 +170,8 @@ export function GiybetCard({
         <img
           src={post.imageUrl}
           alt={t("common.gossipPhoto")}
+          loading="lazy"
+          decoding="async"
           className="mt-3 max-h-72 w-full rounded-xl border border-purple-500/40 object-cover shadow-[0_0_14px_rgba(168,85,247,0.25)]"
         />
       )}

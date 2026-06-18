@@ -1,16 +1,20 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { ActiveGossipChatTabsPanel } from "@/components/chat/ActiveGossipChatTabsPanel";
 import { FeedPostsSection } from "@/components/feed/FeedPostsSection";
 import { FeedTabBar } from "@/components/feed/FeedTabBar";
 import { GiybetFeedModals } from "@/components/feed/GiybetFeedModals";
 import { GiybetRadar } from "@/components/feed/GiybetRadar";
-import { MapTabContent } from "@/components/feed/MapTabContent";
 import { NotificationBellPanel } from "@/components/feed/NotificationBellPanel";
 import { ShareComposer } from "@/components/feed/ShareComposer";
 import { ProfileBar } from "@/components/profile/ProfileBar";
 import { AvatarImage } from "@/components/ui/AvatarImage";
 import { useGiybetFeed, type GiybetFeedProps } from "@/hooks/useGiybetFeed";
+
+const MapTabContent = dynamic(() =>
+  import("@/components/feed/MapTabContent").then((m) => m.MapTabContent),
+);
 
 export default function GiybetFeed(props: GiybetFeedProps) {
   const feed = useGiybetFeed(props);

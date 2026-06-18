@@ -253,6 +253,7 @@ export const en: Messages = {
       other: "Other",
     },
     failed: "Couldn't submit report.",
+    serverNotConfigured: "Report system is not configured. Try again later.",
     alreadyReported: "You already reported this post.",
     selfReport: "You can't report your own post.",
   },

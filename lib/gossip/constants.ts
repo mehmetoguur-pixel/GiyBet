@@ -12,3 +12,5 @@ export const EMPTY_REACTIONS: PostReactions = { fire: 0, shock: 0, secret: 0 };
 export const GOSSIP_CHAT_TABLE = "gossip_chat_messages";
 export const MAX_VENUE_ROOMS = 5;
 export const NOTIFICATION_LIST_LIMIT = 10;
+/** İlk feed yüklemesinde max gönderi — performans */
+export const GOSSIP_FEED_LIMIT = 80;

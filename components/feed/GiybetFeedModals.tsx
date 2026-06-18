@@ -4,6 +4,7 @@ import { ReportModal } from "@/components/ReportModal";
 import { GossipChatFlash } from "@/components/chat/GossipChatFlash";
 import { GossipChatModal } from "@/components/chat/GossipChatModal";
 import { ReportAcknowledgedToast } from "@/components/chat/ReportAcknowledgedToast";
+import { NeonToast } from "@/components/ui/NeonToast";
 import { RoomLimitAlert } from "@/components/chat/RoomLimitAlert";
 import { LikersModal } from "@/components/feed/LikersModal";
 import { GossipLaunchOverlay } from "@/components/map/GossipLaunchOverlay";
@@ -28,6 +29,7 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
     shareLoading,
     roomLimitAlert,
     showReportToast,
+    reportError,
     reportTarget,
     setReportTarget,
     handleSubmitReport,
@@ -68,6 +70,7 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
       <GossipLaunchOverlay visible={shareLoading} />
       {roomLimitAlert && <RoomLimitAlert />}
       {showReportToast && <ReportAcknowledgedToast />}
+      {reportError && <NeonToast message={reportError} variant="error" />}
       <ReportModal
         open={reportTarget != null}
         author={reportTarget?.author ?? ""}

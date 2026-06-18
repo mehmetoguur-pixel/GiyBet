@@ -236,9 +236,12 @@ export async function createRoomForGossip(
   gossipId: string,
   location: { lat: number; lng: number; city: string },
   previewText: string,
+  options?: { skipExistingLookup?: boolean },
 ): Promise<MapRoom> {
-  const existing = await findRoomByGossipId(gossipId);
-  if (existing) return existing;
+  if (!options?.skipExistingLookup) {
+    const existing = await findRoomByGossipId(gossipId);
+    if (existing) return existing;
+  }
 
   const name = `${getLocalizedString("chat.gossipPrefix")}${gossipChatLabel(previewText)}`;
   const payloads: Record<string, string | number>[] = [

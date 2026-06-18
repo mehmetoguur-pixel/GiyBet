@@ -20,6 +20,7 @@ describe("report-validation", () => {
 
   it("validates usernames", () => {
     expect(isValidUsername("gece_yarasi_07")).toBe(true);
+    expect(isValidUsername("ğüşıöç")).toBe(true);
     expect(isValidUsername("bad name")).toBe(false);
   });
 
