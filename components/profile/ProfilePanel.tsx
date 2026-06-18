@@ -15,6 +15,7 @@ import { LanguageSwitcher } from "@/lib/i18n/LanguageSwitcher";
 import { AvatarImage } from "@/components/ui/AvatarImage";
 import { FaceStudioPanel } from "@/components/profile/FaceStudioPanel";
 import { ProfileGossipDetailModal } from "@/components/profile/ProfileGossipDetailModal";
+import { NotificationPreferencesPanel } from "@/components/profile/NotificationPreferencesPanel";
 import { NeonToast } from "@/components/ui/NeonToast";
 import { PasswordField } from "@/components/auth/PasswordField";
 
@@ -274,6 +275,8 @@ export function ProfilePanel({
                   <button type="button" onClick={onStartEdit} className={`${btnPrimary} mt-4`}>
                     {t("profile.editAvatar")}
                   </button>
+
+                  <NotificationPreferencesPanel nickname={nickname} />
 
                   <button
                     type="button"

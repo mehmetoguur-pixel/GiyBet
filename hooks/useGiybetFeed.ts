@@ -6,7 +6,8 @@ import { buildAuthorReactionScores, sumPostReactions } from "@/lib/feed/rank";
 import { RADAR_DEFAULT_METERS } from "@/lib/feed/format";
 import { postHasTag, computeTrendingTags } from "@/lib/feed/tags";
 import { resolvePostDistanceMeters } from "@/lib/geo";
-import type { AvatarCreatorConfig, FeedViewTab } from "@/lib/giybet/types";
+import type { AvatarCreatorConfig, FeedPost, FeedViewTab } from "@/lib/giybet/types";
+import { normalizeGossipId } from "@/lib/gossip/parsers";
 import { useBlockedAuthors } from "@/hooks/feed/useBlockedAuthors";
 import { useFollowAuthors } from "@/hooks/feed/useFollowAuthors";
 import { useFeedGeo } from "@/hooks/feed/useFeedGeo";
@@ -37,6 +38,10 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     onLogout,
     btnPrimary,
     btnSecondary,
+    hasMorePosts = false,
+    loadMoreLoading = false,
+    onLoadMorePosts,
+    initialGossipId,
   } = props;
 
   const { t, nominatimLanguage, placesLanguage } = useI18n();
@@ -45,8 +50,15 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   const [likersModalPostId, setLikersModalPostId] = useState<number | null>(null);
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState<string | null>(null);
+  const [deepLinkPost, setDeepLinkPost] = useState<FeedPost | null>(null);
+  const [mapFollowingOnly, setMapFollowingOnly] = useState(false);
   const [editingAvatar, setEditingAvatar] = useState<AvatarCreatorConfig | null>(null);
   const [radarRadiusMeters, setRadarRadiusMeters] = useState(RADAR_DEFAULT_METERS);
+  const [followFeedback, setFollowFeedback] = useState<{
+    message: string;
+    variant: "success" | "error";
+  } | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -59,7 +71,20 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     followingAuthors,
     followCounts,
     toggleFollowAuthor,
+    unfollowAuthor,
   } = useFollowAuthors(userId, nickname);
+
+  useEffect(() => {
+    if (!initialGossipId?.trim() || posts.length === 0) return;
+    const normalized = normalizeGossipId(initialGossipId.trim());
+    const match = posts.find(
+      (p) => p.gossipId && normalizeGossipId(p.gossipId) === normalized,
+    );
+    if (match) {
+      setDeepLinkPost(match);
+      setFeedTab("feed");
+    }
+  }, [initialGossipId, posts]);
 
   const geo = useFeedGeo({
     nominatimLanguage,
@@ -73,6 +98,8 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     placesLanguage,
     mapPins,
     blockedAuthors,
+    followingAuthors,
+    mapFollowingOnly,
     rooms,
     onCreateRoomAtPlace,
   });
@@ -90,6 +117,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     posts,
     gossipChatLabels: gossipChat.gossipChatLabels,
     onSelectGossip: gossipChat.openGossipChatFromNotification,
+    onSelectFollow: () => setFeedTab("following"),
   });
 
   const report = useReportFlow({
@@ -119,6 +147,10 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     if (!window.confirm(t("common.blockConfirm", { username: trimmed }))) return;
     const blocked = await blockAuthor(author, nickname);
     if (blocked) {
+      if (followingAuthors.has(trimmed)) {
+        await unfollowAuthor(trimmed);
+      }
+      setSelectedUserProfile((prev) => (prev === trimmed ? null : prev));
       gossipChat.setGossipChatError(t("common.blockedUser"));
       window.setTimeout(() => gossipChat.setGossipChatError(""), 2500);
     }
@@ -127,11 +159,30 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   const handleToggleFollow = async (author: string) => {
     const trimmed = author.trim();
     if (!trimmed || trimmed === nickname.trim()) return;
+    if (blockedAuthors.has(trimmed)) return;
+    const wasFollowing = followingAuthors.has(trimmed);
     const ok = await toggleFollowAuthor(trimmed);
     if (!ok) {
-      gossipChat.setGossipChatError(t("follow.failed"));
-      window.setTimeout(() => gossipChat.setGossipChatError(""), 2500);
+      setFollowFeedback({ message: t("follow.failed"), variant: "error" });
+      window.setTimeout(() => setFollowFeedback(null), 2500);
+      return;
     }
+    if (!wasFollowing) {
+      setFollowFeedback({
+        message: t("follow.success", { username: trimmed }),
+        variant: "success",
+      });
+      window.setTimeout(() => setFollowFeedback(null), 2500);
+    }
+  };
+
+  const handleShareGossip = (gossipId: string) => {
+    if (typeof window === "undefined") return;
+    const url = `${window.location.origin}${window.location.pathname}?gossip=${encodeURIComponent(gossipId)}`;
+    void navigator.clipboard.writeText(url).then(() => {
+      setFollowFeedback({ message: t("share.linkCopied"), variant: "success" });
+      window.setTimeout(() => setFollowFeedback(null), 2500);
+    });
   };
 
   const selectedMapPost = useMemo(
@@ -265,6 +316,17 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     filteredPosts,
     followingFilteredPosts,
     followingAuthors,
+    blockedAuthors,
+    followFeedback,
+    hasMorePosts,
+    loadMoreLoading,
+    onLoadMorePosts,
+    selectedUserProfile,
+    setSelectedUserProfile,
+    deepLinkPost,
+    setDeepLinkPost,
+    mapFollowingOnly,
+    setMapFollowingOnly,
     trendingTags,
     mapDisplayPins: map.mapDisplayPins,
     pinsInMapViewport: map.pinsInMapViewport,
@@ -277,6 +339,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     handleOpenReport: report.handleOpenReport,
     handleBlockUser,
     handleToggleFollow,
+    handleShareGossip,
     handleSubmitReport: report.handleSubmitReport,
     handleBellToggle: notifications.handleBellToggle,
     openGossipChat: gossipChat.openGossipChat,

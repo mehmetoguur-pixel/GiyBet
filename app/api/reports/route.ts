@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/api-auth";
-import { checkRateLimit } from "@/lib/api-rate-limit";
+import { checkRateLimitAsync } from "@/lib/api-rate-limit";
 import { notifyAdminNewReport } from "@/lib/admin-notify";
 import { getAdminClient } from "@/lib/supabase-admin";
+import { REPORT_AUTO_HIDE_THRESHOLD } from "@/lib/moderation/auto-hide";
 import {
   isValidGossipId,
   isValidReportReason,
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const rate = checkRateLimit(`report:${user.id}`, 5, 60_000);
+  const rate = await checkRateLimitAsync(`report:${user.id}`, 5, 60_000);
   if (!rate.ok) {
     return NextResponse.json(
       { error: "rate_limit", retryAfterSec: rate.retryAfterSec },
@@ -132,6 +133,19 @@ export async function POST(request: NextRequest) {
     gossipId,
     gossipPreview: gossipPreview || String(gossip.content ?? "").slice(0, 200),
   });
+
+  const { count: reportCount } = await admin
+    .from("content_reports")
+    .select("*", { count: "exact", head: true })
+    .eq("gossip_id", gossipId);
+
+  if ((reportCount ?? 0) >= REPORT_AUTO_HIDE_THRESHOLD) {
+    await admin
+      .from("gossips")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", gossipId)
+      .is("deleted_at", null);
+  }
 
   return NextResponse.json({ ok: true });
 }

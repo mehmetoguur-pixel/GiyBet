@@ -1,10 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { ForgotPasswordModal } from "@/components/auth/ForgotPasswordModal";
+import { BanAppealModal } from "@/components/auth/BanAppealModal";
 import { AuthForms } from "@/components/home/AuthForms";
 import { HomeFooter } from "@/components/home/HomeFooter";
 import { WelcomeModal } from "@/components/home/WelcomeModal";
+import { OnboardingTour, isOnboardingDone } from "@/components/onboarding/OnboardingTour";
 import { useFeedActions } from "@/hooks/home/useFeedActions";
 import { useHomeAuth } from "@/hooks/home/useHomeAuth";
 import {
@@ -14,6 +17,7 @@ import {
 } from "@/lib/auth-utils";
 import { saveRegisteredUser } from "@/lib/auth/profile";
 import { useI18n } from "@/lib/i18n/provider";
+import { useState } from "react";
 
 const GiybetFeed = dynamic(() => import("@/components/feed/GiybetFeed"), {
   loading: () => (
@@ -25,7 +29,10 @@ const GiybetFeed = dynamic(() => import("@/components/feed/GiybetFeed"), {
 
 export default function Home() {
   const { t } = useI18n();
+  const searchParams = useSearchParams();
+  const initialGossipId = searchParams.get("gossip");
   const auth = useHomeAuth({ t });
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const feed = useFeedActions({
     onFeed: auth.onFeed,
@@ -73,10 +80,23 @@ export default function Home() {
         <WelcomeModal
           nickname={auth.nickname}
           btnPrimary={btnPrimary}
-          onEnter={auth.handleEnterFeed}
+          onEnter={() => {
+            auth.handleEnterFeed();
+            if (!isOnboardingDone()) setShowOnboarding(true);
+          }}
           t={t}
         />
       )}
+
+      {showOnboarding && auth.onFeed && (
+        <OnboardingTour btnPrimary={btnPrimary} onComplete={() => setShowOnboarding(false)} />
+      )}
+
+      <BanAppealModal
+        open={auth.showBanAppeal}
+        username={auth.bannedUsername}
+        onClose={() => auth.setShowBanAppeal(false)}
+      />
 
       <main
         className={`mx-auto flex w-full flex-1 flex-col px-5 pb-14 pt-10 ${auth.onFeed ? "max-w-2xl" : "max-w-md"}`}
@@ -105,6 +125,10 @@ export default function Home() {
             onLogout={feed.handleLogout}
             btnPrimary={btnPrimary}
             btnSecondary={btnSecondary}
+            hasMorePosts={feed.hasMorePosts}
+            loadMoreLoading={feed.loadMoreLoading}
+            onLoadMorePosts={feed.loadMorePosts}
+            initialGossipId={initialGossipId}
           />
         ) : (
           <AuthForms

@@ -27,6 +27,8 @@ type UseMapViewportOptions = {
   placesLanguage: string;
   mapPins: MapPin[];
   blockedAuthors: Set<string>;
+  followingAuthors?: Set<string>;
+  mapFollowingOnly?: boolean;
   rooms: MapRoom[];
   onCreateRoomAtPlace: (place: PlaceDetail) => Promise<MapRoom | null>;
 };
@@ -37,6 +39,8 @@ export function useMapViewport({
   placesLanguage,
   mapPins,
   blockedAuthors,
+  followingAuthors,
+  mapFollowingOnly = false,
   rooms,
   onCreateRoomAtPlace,
 }: UseMapViewportOptions) {
@@ -167,8 +171,12 @@ export function useMapViewport({
     return mapPins
       .filter((pin) => isMapPinWithinWindow(pin.createdAt))
       .filter((pin) => !blockedAuthors.has(pin.author.trim()))
+      .filter((pin) => {
+        if (!mapFollowingOnly || !followingAuthors) return true;
+        return followingAuthors.has(pin.author.trim());
+      })
       .filter((pin) => isCoordInMapBounds(pin.lat, pin.lng, mapViewportBounds));
-  }, [mapPins, blockedAuthors, mapZoom, mapViewportBounds]);
+  }, [mapPins, blockedAuthors, followingAuthors, mapFollowingOnly, mapZoom, mapViewportBounds]);
 
   useEffect(() => {
     if (!selectedMapPin) return;

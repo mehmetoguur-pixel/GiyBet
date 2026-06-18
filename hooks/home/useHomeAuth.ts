@@ -59,6 +59,8 @@ export function useHomeAuth({ t }: UseHomeAuthOptions) {
   const [authLoading, setAuthLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showBanAppeal, setShowBanAppeal] = useState(false);
+  const [bannedUsername, setBannedUsername] = useState("");
   const [onFeed, setOnFeed] = useState(false);
   const [registeredUser, setRegisteredUser] = useState<RegisteredUser | null>(
     () => bootstrap.user,
@@ -80,6 +82,8 @@ export function useHomeAuth({ t }: UseHomeAuthOptions) {
       const banStatus = await fetchBanStatus(profile.userId);
       if (banStatus.banned) {
         await supabase.auth.signOut();
+        setBannedUsername(profile.nickname || profile.contact);
+        setShowBanAppeal(true);
         sessionStorage.setItem(AUTH_NOTICE_KEY, t("auth.banned"));
         setAuthNotice(t("auth.banned"));
         setIsLogin(true);
@@ -214,6 +218,8 @@ export function useHomeAuth({ t }: UseHomeAuthOptions) {
       const banStatus = await fetchBanStatus(profile.userId);
       if (banStatus.banned) {
         await supabase.auth.signOut();
+        setBannedUsername(profile.nickname || profile.contact);
+        setShowBanAppeal(true);
         setError(t("auth.banned"));
         return;
       }
@@ -353,6 +359,9 @@ export function useHomeAuth({ t }: UseHomeAuthOptions) {
     forgotPasswordOpen,
     setForgotPasswordOpen,
     showWelcome,
+    showBanAppeal,
+    setShowBanAppeal,
+    bannedUsername,
     onFeed,
     registeredUser,
     setRegisteredUser,

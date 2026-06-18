@@ -8,6 +8,7 @@ import { reactionLabel } from "@/lib/gossip/api";
 import {
   enrichPostsWithComments,
   fetchGossipsFromSupabase,
+  fetchGossipsPage,
   insertCommentToSupabase,
   notifyPostAuthor,
   updateGossipEngagement,
@@ -36,6 +37,7 @@ import { getLocalizedString } from "@/lib/i18n";
 import { useFeedRealtime } from "@/hooks/feed/useFeedRealtime";
 import { mergeServerPostsIntoFeed } from "@/lib/gossip/realtime-feed";
 import { filterFreshMapPins } from "@/lib/map/pin-age";
+import { GOSSIP_PAGE_SIZE } from "@/lib/gossip/constants";
 import { supabase } from "@/lib/supabase";
 import type { PlaceDetail } from "@/lib/places-api";
 import type {
@@ -74,6 +76,8 @@ export function useFeedActions({
   const [mapPins, setMapPins] = useState<MapPin[]>([]);
   const [mapRooms, setMapRooms] = useState<MapRoom[]>([]);
   const [engagementToast, setEngagementToast] = useState<string | null>(null);
+  const [hasMorePosts, setHasMorePosts] = useState(false);
+  const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const lastShareAtRef = useRef(0);
   const refreshInFlightRef = useRef(false);
 
@@ -84,6 +88,7 @@ export function useFeedActions({
       const { posts, pins } = await fetchGossipsFromSupabase(nickname);
       setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, posts));
       setMapPins(filterFreshMapPins(pins));
+      setHasMorePosts(posts.length >= GOSSIP_PAGE_SIZE);
       const withComments = await enrichPostsWithComments(posts);
       setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, withComments));
     } finally {
@@ -583,6 +588,26 @@ export function useFeedActions({
     return normalized;
   };
 
+  const loadMorePosts = async () => {
+    if (loadMoreLoading || !hasMorePosts) return;
+    setLoadMoreLoading(true);
+    try {
+      const offset = feedPosts.length;
+      const { posts, pins } = await fetchGossipsPage(offset, GOSSIP_PAGE_SIZE, nickname);
+      if (!posts.length) {
+        setHasMorePosts(false);
+        return;
+      }
+      setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, posts));
+      setMapPins((prev) => filterFreshMapPins([...prev, ...pins]));
+      setHasMorePosts(posts.length >= GOSSIP_PAGE_SIZE);
+      const withComments = await enrichPostsWithComments(posts);
+      setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, withComments));
+    } finally {
+      setLoadMoreLoading(false);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     onLogout();
@@ -594,6 +619,9 @@ export function useFeedActions({
     mapPins,
     mapRooms,
     engagementToast,
+    hasMorePosts,
+    loadMoreLoading,
+    loadMorePosts,
     clearFeedData,
     handleCreateRoomAtPlace,
     handleDeleteGossip,

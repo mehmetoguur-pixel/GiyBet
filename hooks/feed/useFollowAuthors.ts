@@ -30,10 +30,12 @@ export function useFollowAuthors(userId: string, nickname: string) {
     async (author: string) => {
       const trimmed = author.trim();
       if (!trimmed || trimmed === nickname.trim() || !userId) return false;
-      const err = await followUsername(userId, nickname, trimmed);
-      if (!err) {
+      const err = await followUsername(trimmed);
+      if (!err || err === "already_following") {
         setFollowingAuthors((prev) => new Set([...prev, trimmed]));
-        setFollowCounts((c) => ({ ...c, following: c.following + 1 }));
+        if (!err) {
+          setFollowCounts((c) => ({ ...c, following: c.following + 1 }));
+        }
         return true;
       }
       return false;
@@ -45,7 +47,7 @@ export function useFollowAuthors(userId: string, nickname: string) {
     async (author: string) => {
       const trimmed = author.trim();
       if (!trimmed || !userId) return false;
-      const err = await unfollowUsername(userId, trimmed);
+      const err = await unfollowUsername(trimmed);
       if (!err) {
         setFollowingAuthors((prev) => {
           const next = new Set(prev);

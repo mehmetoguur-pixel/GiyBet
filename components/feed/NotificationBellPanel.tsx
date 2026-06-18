@@ -15,7 +15,7 @@ export function NotificationBellPanel({
   unreadCount: number;
   open: boolean;
   onToggle: () => void;
-  onSelect: (gossipId: string) => void;
+  onSelect: (notification: BellNotification) => void;
 }) {
   const { t } = useI18n();
   return (
@@ -50,10 +50,10 @@ export function NotificationBellPanel({
                 <li key={n.id}>
                   <button
                     type="button"
-                    onClick={() => onSelect(n.gossipId)}
+                    onClick={() => onSelect(n)}
                     className="w-full border-b border-zinc-800/60 px-3 py-2.5 text-left text-xs text-zinc-300 transition-all hover:bg-purple-950/40 hover:text-pink-200"
                   >
-                    ⚡ {n.message}
+                    {n.type === "follow" || n.gossipId.startsWith("follow-") ? "👤" : "⚡"} {n.message}
                   </button>
                 </li>
               ))}

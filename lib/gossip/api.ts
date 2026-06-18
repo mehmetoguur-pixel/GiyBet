@@ -9,7 +9,7 @@ import type {
   MapPin,
   ReactionKey,
 } from "@/lib/giybet/types";
-import { GOSSIP_FEED_LIMIT, GOSSIP_IMAGE_BUCKET, NOTIFICATION_LIST_LIMIT } from "./constants";
+import { GOSSIP_FEED_LIMIT, GOSSIP_IMAGE_BUCKET, GOSSIP_PAGE_SIZE, NOTIFICATION_LIST_LIMIT } from "./constants";
 import {
   applyCommentsToPost,
   commentRowToComment,
@@ -17,6 +17,10 @@ import {
 } from "./parsers";
 import { gossipRowToFeedPost, gossipRowToMapPin } from "./transform";
 import { isMapPinWithinWindow } from "@/lib/map/pin-age";
+import {
+  isNotificationMutedForUser,
+  type NotificationPrefType,
+} from "@/lib/notification-preferences";
 
 export async function uploadGossipImage(file: File): Promise<string | null> {
   try {
@@ -111,18 +115,25 @@ export async function fetchCommentsByGossipIds(gossipIds: string[]): Promise<Map
   }
   return map;
 }
-export async function fetchGossipsFromSupabase(currentUsername = ""): Promise<{
+export async function fetchGossipsPage(
+  offset: number,
+  limit: number,
+  currentUsername = "",
+): Promise<{
   posts: FeedPost[];
   pins: MapPin[];
   gossipIds: string[];
 }> {
   const locale = resolveStoredLocale() ?? detectDeviceLocale();
+  const safeOffset = Math.max(0, offset);
+  const safeLimit = Math.min(Math.max(1, limit), GOSSIP_FEED_LIMIT);
+
   const { data, error } = await supabase
     .from("gossips")
     .select("*")
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
-    .limit(GOSSIP_FEED_LIMIT);
+    .range(safeOffset, safeOffset + safeLimit - 1);
 
   if (error || !data?.length) {
     return { posts: [], pins: [], gossipIds: [] };
@@ -145,6 +156,14 @@ export async function fetchGossipsFromSupabase(currentUsername = ""): Promise<{
   return { posts, pins, gossipIds };
 }
 
+export async function fetchGossipsFromSupabase(currentUsername = ""): Promise<{
+  posts: FeedPost[];
+  pins: MapPin[];
+  gossipIds: string[];
+}> {
+  return fetchGossipsPage(0, GOSSIP_PAGE_SIZE, currentUsername);
+}
+
 /** Yorumları arka planda yükle — feed önce görünür */
 export async function enrichPostsWithComments(posts: FeedPost[]): Promise<FeedPost[]> {
   const gossipIds = posts
@@ -164,7 +183,7 @@ export async function fetchAuthorNotifications(recipient: string): Promise<{
   const [listResult, countResult] = await Promise.all([
     supabase
       .from("notifications")
-      .select("id, gossip_id, message, created_at")
+      .select("id, gossip_id, message, created_at, type")
       .eq("recipient_username", trimmed)
       .order("created_at", { ascending: false })
       .limit(NOTIFICATION_LIST_LIMIT),
@@ -180,11 +199,17 @@ export async function fetchAuthorNotifications(recipient: string): Promise<{
   }
 
   const items = listResult.data.map((row) => {
-    const r = row as { id: string; gossip_id: string; message: string };
+    const r = row as {
+      id: string;
+      gossip_id: string;
+      message: string;
+      type?: BellNotification["type"];
+    };
     return {
       id: r.id,
       gossipId: r.gossip_id,
       message: r.message,
+      type: r.type,
     };
   });
 
@@ -205,12 +230,14 @@ export async function notifyPostAuthor(
   recipient: string,
   actor: string,
   gossipId: string,
-  type: "like" | "comment" | "reaction",
+  type: NotificationPrefType,
   message: string,
 ): Promise<void> {
   const to = recipient.trim();
   const from = actor.trim();
   if (!to || !from || to === from) return;
+
+  if (await isNotificationMutedForUser(to, type)) return;
 
   await supabase.from("notifications").insert([
     {

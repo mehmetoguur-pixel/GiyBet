@@ -29,4 +29,8 @@ export type GiybetFeedProps = {
   onLogout: () => void;
   btnPrimary: string;
   btnSecondary: string;
+  hasMorePosts?: boolean;
+  loadMoreLoading?: boolean;
+  onLoadMorePosts?: () => void;
+  initialGossipId?: string | null;
 };

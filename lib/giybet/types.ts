@@ -220,6 +220,7 @@ export type BellNotification = {
   gossipId: string;
   message: string;
   label?: string;
+  type?: "like" | "comment" | "reaction" | "follow";
 };
 
 export type RoomMessageRow = {

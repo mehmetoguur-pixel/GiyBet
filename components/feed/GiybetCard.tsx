@@ -26,6 +26,8 @@ export function GiybetCard({
   onTagClick,
   followingAuthors,
   onToggleFollow,
+  onAuthorClick,
+  onShareGossip,
 }: {
   post: FeedPost;
   currentUserId?: string;
@@ -43,6 +45,8 @@ export function GiybetCard({
   onTagClick?: (tag: string) => void;
   followingAuthors?: Set<string>;
   onToggleFollow?: (author: string) => void;
+  onAuthorClick?: (author: string) => void;
+  onShareGossip?: (gossipId: string) => void;
 }) {
   const { t } = useI18n();
   const [showComments, setShowComments] = useState(false);
@@ -129,6 +133,18 @@ export function GiybetCard({
                       {isFollowing ? `✓ ${t("common.unfollowUser")}` : `👤 ${t("common.followUser")}`}
                     </button>
                   )}
+                  {onShareGossip && post.gossipId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowActionsMenu(false);
+                        onShareGossip(post.gossipId!);
+                      }}
+                      className="block w-full px-3 py-2 text-left text-xs text-purple-300 hover:bg-zinc-900/80"
+                    >
+                      🔗 {t("share.copyLink")}
+                    </button>
+                  )}
                   {onBlockUser && (
                     <button
                       type="button"
@@ -178,8 +194,27 @@ export function GiybetCard({
         <AvatarImage config={post.avatar} className="h-9 w-9" />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <p className="truncate text-sm font-medium text-zinc-300">@{post.author}</p>
+            <button
+              type="button"
+              onClick={() => onAuthorClick?.(post.author)}
+              className="truncate text-sm font-medium text-zinc-300 hover:text-pink-300"
+            >
+              @{post.author}
+            </button>
             <RankBadge score={authorReactionScores[post.author] ?? 0} />
+            {!isOwner && onToggleFollow && (
+              <button
+                type="button"
+                onClick={() => onToggleFollow(post.author)}
+                className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold transition active:scale-95 ${
+                  isFollowing
+                    ? "border-sky-500/45 bg-sky-950/35 text-sky-300 hover:border-sky-400/60"
+                    : "border-purple-500/45 bg-purple-950/35 text-purple-300 hover:border-pink-500/50 hover:text-pink-200"
+                }`}
+              >
+                {isFollowing ? t("common.unfollowUser") : t("common.followUser")}
+              </button>
+            )}
           </div>
           <p className="text-[11px] text-zinc-600">{post.time}</p>
         </div>

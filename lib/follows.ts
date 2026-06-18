@@ -1,34 +1,51 @@
 import { supabase } from "./supabase";
 
-export async function followUsername(
-  followerUserId: string,
-  followerUsername: string,
-  followedUsername: string,
-): Promise<string | null> {
-  const followed = followedUsername.trim();
-  const follower = followerUsername.trim();
-  if (!followed || !follower || followed === follower) return "self_follow_forbidden";
-
-  const { error } = await supabase.from("user_follows").insert([
-    {
-      follower_user_id: followerUserId,
-      follower_username: follower,
-      followed_username: followed,
-    },
-  ]);
-  return error?.message ?? null;
+async function getAuthToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
 }
 
-export async function unfollowUsername(
-  followerUserId: string,
-  followedUsername: string,
-): Promise<string | null> {
-  const { error } = await supabase
-    .from("user_follows")
-    .delete()
-    .eq("follower_user_id", followerUserId)
-    .eq("followed_username", followedUsername.trim());
-  return error?.message ?? null;
+export async function followUsername(followedUsername: string): Promise<string | null> {
+  const followed = followedUsername.trim();
+  if (!followed) return "invalid_username";
+
+  const token = await getAuthToken();
+  if (!token) return "unauthorized";
+
+  const res = await fetch("/api/follows", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ followedUsername: followed }),
+  });
+
+  if (res.ok) return null;
+
+  const body = (await res.json().catch(() => ({}))) as { error?: string };
+  return body.error ?? "failed";
+}
+
+export async function unfollowUsername(followedUsername: string): Promise<string | null> {
+  const followed = followedUsername.trim();
+  if (!followed) return "invalid_username";
+
+  const token = await getAuthToken();
+  if (!token) return "unauthorized";
+
+  const res = await fetch(
+    `/api/follows?followedUsername=${encodeURIComponent(followed)}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
+
+  if (res.ok) return null;
+
+  const body = (await res.json().catch(() => ({}))) as { error?: string };
+  return body.error ?? "failed";
 }
 
 export async function fetchFollowingUsernames(userId: string): Promise<string[]> {
@@ -40,6 +57,29 @@ export async function fetchFollowingUsernames(userId: string): Promise<string[]>
   return data
     .map((row) => (row as { followed_username: string }).followed_username?.trim())
     .filter(Boolean);
+}
+
+export async function fetchFollowCountsByUsername(
+  username: string,
+): Promise<{ followers: number; following: number }> {
+  const trimmed = username.trim();
+  if (!trimmed) return { followers: 0, following: 0 };
+
+  const [followingRes, followersRes] = await Promise.all([
+    supabase
+      .from("user_follows")
+      .select("*", { count: "exact", head: true })
+      .eq("follower_username", trimmed),
+    supabase
+      .from("user_follows")
+      .select("*", { count: "exact", head: true })
+      .eq("followed_username", trimmed),
+  ]);
+
+  return {
+    following: followingRes.count ?? 0,
+    followers: followersRes.count ?? 0,
+  };
 }
 
 export async function fetchFollowCounts(

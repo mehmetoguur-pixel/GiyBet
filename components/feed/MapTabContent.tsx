@@ -37,6 +37,8 @@ export function MapTabContent({ feed }: { feed: FeedState }) {
     handleMapBoundsChange,
     handleOpenRoomAtSelectedPlace,
     handleShareAtSelectedPlace,
+    mapFollowingOnly,
+    setMapFollowingOnly,
     setSelectedMapPin,
     setMapShareTarget,
   } = feed;
@@ -63,6 +65,17 @@ export function MapTabContent({ feed }: { feed: FeedState }) {
             {t("map.myLocation")}
           </button>
         )}
+        <button
+          type="button"
+          onClick={() => setMapFollowingOnly((v) => !v)}
+          className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${
+            mapFollowingOnly
+              ? "border-pink-500/50 bg-pink-950/40 text-pink-200"
+              : "border-zinc-700 bg-zinc-900/80 text-zinc-300 hover:border-purple-500/40"
+          }`}
+        >
+          {mapFollowingOnly ? t("map.followingOnlyOn") : t("map.followingOnly")}
+        </button>
         <span className="text-[11px] text-zinc-500">
           {mapPinsVisible
             ? t("map.pinsInArea", { count: pinsInMapViewport.length })

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { initPushNotifications } from "@/lib/push";
 import { subscribeNotifications, unsubscribeChannel } from "@/lib/realtime";
 import { normalizeGossipId } from "@/lib/gossip/parsers";
@@ -14,6 +14,7 @@ type UseFeedNotificationsOptions = {
   posts: FeedPost[];
   gossipChatLabels: Record<string, string>;
   onSelectGossip: (gossipId: string) => void;
+  onSelectFollow?: () => void;
 };
 
 export function useFeedNotifications({
@@ -22,10 +23,12 @@ export function useFeedNotifications({
   posts,
   gossipChatLabels,
   onSelectGossip,
+  onSelectFollow,
 }: UseFeedNotificationsOptions) {
   const [bellNotifications, setBellNotifications] = useState<BellNotification[]>([]);
   const [unreadBellCount, setUnreadBellCount] = useState(0);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
+  const lastUnreadRef = useRef(0);
 
   const loadAuthorNotifications = useCallback(async () => {
     const { items, unreadCount } = await fetchAuthorNotifications(nickname);
@@ -41,6 +44,17 @@ export function useFeedNotifications({
         label: labelByGossip.get(n.gossipId) ?? gossipChatLabels[n.gossipId],
       })),
     );
+    if (unreadCount > lastUnreadRef.current && typeof window !== "undefined" && "Notification" in window) {
+      const latest = items[0];
+      if (Notification.permission === "granted" && latest) {
+        try {
+          new Notification("GıyBet", { body: latest.message, tag: latest.id });
+        } catch {
+          /* optional */
+        }
+      }
+    }
+    lastUnreadRef.current = unreadCount;
     setUnreadBellCount(unreadCount);
   }, [nickname, posts, gossipChatLabels]);
 
@@ -80,11 +94,18 @@ export function useFeedNotifications({
     });
   };
 
-  const handleBellNotificationSelect = (gossipId: string) => {
+  const handleBellNotificationSelect = (notification: BellNotification) => {
     setShowBellDropdown(false);
     setUnreadBellCount(0);
     markNotificationsRead(nickname);
-    onSelectGossip(gossipId);
+
+    const isFollow =
+      notification.type === "follow" || notification.gossipId.startsWith("follow-");
+    if (isFollow) {
+      onSelectFollow?.();
+      return;
+    }
+    onSelectGossip(notification.gossipId);
   };
 
   return {

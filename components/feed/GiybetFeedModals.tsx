@@ -10,7 +10,9 @@ import { LikersModal } from "@/components/feed/LikersModal";
 import { GossipLaunchOverlay } from "@/components/map/GossipLaunchOverlay";
 import { MapPinDetailModal } from "@/components/map/MapPinDetailModal";
 import { MapShareModal } from "@/components/map/MapShareModal";
+import { ProfileGossipDetailModal } from "@/components/profile/ProfileGossipDetailModal";
 import { ProfilePanel } from "@/components/profile/ProfilePanel";
+import { UserProfileModal } from "@/components/profile/UserProfileModal";
 import { getLocalizedString } from "@/lib/i18n";
 import type { useGiybetFeed } from "@/hooks/useGiybetFeed";
 
@@ -63,6 +65,16 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
     profileFollowing,
     userReactionScore,
     userPosts,
+    posts,
+    followingAuthors,
+    followFeedback,
+    selectedUserProfile,
+    setSelectedUserProfile,
+    blockedAuthors,
+    deepLinkPost,
+    setDeepLinkPost,
+    handleBlockUser,
+    handleToggleFollow,
   } = feed;
 
   return (
@@ -71,6 +83,9 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
       {roomLimitAlert && <RoomLimitAlert />}
       {showReportToast && <ReportAcknowledgedToast />}
       {reportError && <NeonToast message={reportError} variant="error" />}
+      {followFeedback && (
+        <NeonToast message={followFeedback.message} variant={followFeedback.variant} />
+      )}
       <ReportModal
         open={reportTarget != null}
         author={reportTarget?.author ?? ""}
@@ -160,6 +175,26 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
         btnSecondary={btnSecondary}
         authorReactionScores={authorReactionScores}
       />
+      {selectedUserProfile && (
+        <UserProfileModal
+          username={selectedUserProfile}
+          posts={posts}
+          currentNickname={nickname}
+          followingAuthors={followingAuthors}
+          blockedAuthors={blockedAuthors}
+          authorReactionScores={authorReactionScores}
+          onClose={() => setSelectedUserProfile(null)}
+          onToggleFollow={handleToggleFollow}
+          onBlockUser={handleBlockUser}
+        />
+      )}
+      {deepLinkPost && (
+        <ProfileGossipDetailModal
+          post={deepLinkPost}
+          authorReactionScores={authorReactionScores}
+          onClose={() => setDeepLinkPost(null)}
+        />
+      )}
     </>
   );
 }
