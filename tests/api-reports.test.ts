@@ -5,7 +5,13 @@ import { getAdminClient } from "@/lib/supabase-admin";
 import { POST } from "@/app/api/reports/route";
 import { jsonRequest } from "./helpers/request";
 
-vi.mock("@/lib/api-auth", () => ({ getSessionUser: vi.fn() }));
+vi.mock("@/lib/api-auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/api-auth")>();
+  return {
+    ...actual,
+    getSessionUser: vi.fn(),
+  };
+});
 vi.mock("@/lib/supabase-admin", () => ({ getAdminClient: vi.fn() }));
 vi.mock("@/lib/admin-notify", () => ({ notifyAdminNewReport: vi.fn() }));
 

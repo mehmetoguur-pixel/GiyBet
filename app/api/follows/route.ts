@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/api-auth";
+import { getSessionUser, getRequestSupabaseClient } from "@/lib/api-auth";
 import { checkRateLimitAsync } from "@/lib/api-rate-limit";
 import { getAdminClient } from "@/lib/supabase-admin";
 import { isNotificationMutedForUser } from "@/lib/notification-preferences";
@@ -28,12 +28,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
 
-    const admin = getAdminClient();
-    if (!admin) {
+    const db = getRequestSupabaseClient(request);
+    if (!db) {
       return NextResponse.json({ following: [] });
     }
 
-    const { data } = await admin
+    const { data } = await db
       .from("user_follows")
       .select("followed_username")
       .eq("follower_user_id", user.id);
@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const admin = getAdminClient();
-  if (!admin) {
+  const db = getRequestSupabaseClient(request);
+  if (!db) {
     return NextResponse.json({ error: "server_not_configured" }, { status: 503 });
   }
 
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "self_follow_forbidden" }, { status: 400 });
   }
 
-  const { data: blockRow } = await admin
+  const { data: blockRow } = await db
     .from("user_blocks")
     .select("id")
     .eq("blocker_user_id", user.id)
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "blocked_user" }, { status: 400 });
   }
 
-  const { error } = await admin.from("user_follows").insert({
+  const { error } = await db.from("user_follows").insert({
     follower_user_id: user.id,
     follower_username: followerNickname,
     followed_username: followedUsername,
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
   const message = `${followerNickname} seni takip etmeye başladı`;
   const muted = await isNotificationMutedForUser(followedUsername, "follow");
   if (!muted) {
-    await admin.from("notifications").insert({
+    await db.from("notifications").insert({
       recipient_username: followedUsername,
       actor_username: followerNickname,
       gossip_id: followGossipId(user.id),
@@ -159,8 +159,8 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const admin = getAdminClient();
-  if (!admin) {
+  const db = getRequestSupabaseClient(request);
+  if (!db) {
     return NextResponse.json({ error: "server_not_configured" }, { status: 503 });
   }
 
@@ -169,7 +169,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "invalid_username" }, { status: 400 });
   }
 
-  const { error } = await admin
+  const { error } = await db
     .from("user_follows")
     .delete()
     .eq("follower_user_id", user.id)

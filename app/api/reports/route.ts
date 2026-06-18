@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/api-auth";
+import { getSessionUser, getRequestSupabaseClient } from "@/lib/api-auth";
 import { checkRateLimitAsync } from "@/lib/api-rate-limit";
 import { notifyAdminNewReport } from "@/lib/admin-notify";
 import { getAdminClient } from "@/lib/supabase-admin";
@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const admin = getAdminClient();
-  if (!admin) {
+  const db = getRequestSupabaseClient(request);
+  if (!db) {
     return NextResponse.json({ error: "server_not_configured" }, { status: 503 });
   }
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_gossip_id" }, { status: 400 });
   }
 
-  const { data: gossip, error: gossipError } = await admin
+  const { data: gossip, error: gossipError } = await db
     .from("gossips")
     .select("id, username, user_id, deleted_at, content")
     .eq("id", gossipId)
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "invalid_reporter_profile" }, { status: 400 });
   }
 
-  const { data: existing } = await admin
+  const { data: existing } = await db
     .from("content_reports")
     .select("id")
     .eq("reporter_user_id", user.id)
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "already_reported" }, { status: 409 });
   }
 
-  const { error: insertError } = await admin.from("content_reports").insert([
+  const { error: insertError } = await db.from("content_reports").insert([
     {
       reporter_user_id: user.id,
       reporter_username: reporterUsername,
@@ -134,17 +134,20 @@ export async function POST(request: NextRequest) {
     gossipPreview: gossipPreview || String(gossip.content ?? "").slice(0, 200),
   });
 
-  const { count: reportCount } = await admin
-    .from("content_reports")
-    .select("*", { count: "exact", head: true })
-    .eq("gossip_id", gossipId);
+  const admin = getAdminClient();
+  if (admin) {
+    const { count: reportCount } = await admin
+      .from("content_reports")
+      .select("*", { count: "exact", head: true })
+      .eq("gossip_id", gossipId);
 
-  if ((reportCount ?? 0) >= REPORT_AUTO_HIDE_THRESHOLD) {
-    await admin
-      .from("gossips")
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", gossipId)
-      .is("deleted_at", null);
+    if ((reportCount ?? 0) >= REPORT_AUTO_HIDE_THRESHOLD) {
+      await admin
+        .from("gossips")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", gossipId)
+        .is("deleted_at", null);
+    }
   }
 
   return NextResponse.json({ ok: true });
