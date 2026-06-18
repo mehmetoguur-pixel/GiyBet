@@ -67,27 +67,65 @@ export function mergeGossipUpdate(
     };
   }
 
+  const hasLikers = row.like_usernames !== undefined && row.like_usernames !== null;
+  const hasReactions = row.reaction_counts !== undefined && row.reaction_counts !== null;
+  const hasUserReactions = row.user_reactions !== undefined && row.user_reactions !== null;
+  const hasTags = row.tags !== undefined && row.tags !== null;
+
+  if (!hasLikers && !hasReactions && !hasUserReactions && !hasTags && !row.room_id) {
+    return { posts, pins };
+  }
+
   const trimmed = nickname.trim();
-  const likers = parseLikeUsernames(row.like_usernames);
-  const userReactionsMap = parseUserReactions(row.user_reactions);
-  const reactions = parseReactionCounts(row.reaction_counts);
-  const tags = parseGossipTags(row);
 
   const nextPosts = posts.map((post) => {
     if (normalizeGossipId(post.gossipId ?? "") !== gossipId) return post;
+
+    const likers = hasLikers ? parseLikeUsernames(row.like_usernames) : post.likers;
+    const userReactionsMap = hasUserReactions
+      ? parseUserReactions(row.user_reactions)
+      : (post.userReactionsMap ?? {});
+    const reactions = hasReactions ? parseReactionCounts(row.reaction_counts) : post.reactions;
+    const tags = hasTags ? parseGossipTags(row) : post.tags;
+
     return {
       ...post,
-      likers,
-      liked: trimmed ? likers.includes(trimmed) : post.liked,
-      reactions,
-      userReaction: trimmed ? userReactionsMap[trimmed] ?? null : post.userReaction,
-      userReactionsMap,
-      tags,
+      ...(hasLikers
+        ? { likers, liked: trimmed ? likers.includes(trimmed) : post.liked }
+        : {}),
+      ...(hasReactions ? { reactions } : {}),
+      ...(hasUserReactions
+        ? {
+            userReactionsMap,
+            userReaction: trimmed ? userReactionsMap[trimmed] ?? null : post.userReaction,
+          }
+        : {}),
+      ...(hasTags ? { tags } : {}),
       ...(row.room_id ? { roomId: row.room_id } : {}),
     };
   });
 
   return { posts: nextPosts, pins };
+}
+
+/** Sunucudan gelen feed ile mevcut UI durumunu birleştir (mesafe, yorumlar) */
+export function mergeServerPostsIntoFeed(existing: FeedPost[], server: FeedPost[]): FeedPost[] {
+  const byGossip = new Map(
+    existing.map((p) => [normalizeGossipId(p.gossipId ?? ""), p]),
+  );
+  return server.map((serverPost) => {
+    const prev = byGossip.get(normalizeGossipId(serverPost.gossipId ?? ""));
+    if (!prev) return serverPost;
+    const comments =
+      prev.commentItems.length >= serverPost.commentItems.length
+        ? prev.commentItems
+        : serverPost.commentItems;
+    return {
+      ...serverPost,
+      distanceMeters: prev.distanceMeters ?? serverPost.distanceMeters,
+      commentItems: comments,
+    };
+  });
 }
 
 export function mergeCommentInsert(posts: FeedPost[], row: CommentRow): FeedPost[] {

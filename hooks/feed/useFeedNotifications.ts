@@ -57,7 +57,7 @@ export function useFeedNotifications({
     });
     const trimmed = nickname.trim();
     const channel = subscribeNotifications(trimmed, loadAuthorNotifications);
-    const intervalId = window.setInterval(loadAuthorNotifications, 15_000);
+    const intervalId = window.setInterval(loadAuthorNotifications, 45_000);
     const onVisibility = () => {
       if (document.visibilityState === "visible") loadAuthorNotifications();
     };

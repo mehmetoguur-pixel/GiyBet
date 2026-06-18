@@ -84,6 +84,14 @@ export function normalizeGossipId(id: string | number): string {
 }
 
 export function parseLikeUsernames(raw: unknown): string[] {
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) raw = parsed;
+    } catch {
+      return [];
+    }
+  }
   if (!Array.isArray(raw)) return [];
   return raw
     .filter((entry): entry is string => typeof entry === "string" && entry.trim().length > 0)

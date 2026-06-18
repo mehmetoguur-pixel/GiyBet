@@ -11,8 +11,6 @@ import {
 import { subscribeFeedRealtime, unsubscribeChannel } from "@/lib/realtime";
 import type { FeedPost, MapPin } from "@/lib/giybet/types";
 
-const FEED_POLL_MS = 20_000;
-
 type UseFeedRealtimeOptions = {
   enabled: boolean;
   nickname: string;
@@ -58,8 +56,6 @@ export function useFeedRealtime({
       },
     });
 
-    const intervalId = window.setInterval(onRefresh, FEED_POLL_MS);
-
     const onVisibility = () => {
       if (document.visibilityState === "visible") onRefresh();
     };
@@ -67,7 +63,6 @@ export function useFeedRealtime({
 
     return () => {
       unsubscribeChannel(channel);
-      window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [enabled, nickname, setFeedPosts, setMapPins, onRefresh]);

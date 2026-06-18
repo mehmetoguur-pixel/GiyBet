@@ -34,6 +34,7 @@ import { deleteOwnGossip, GOSSIP_RATE_LIMIT, isRateLimitError } from "@/lib/mode
 import { isBanError } from "@/lib/rate-limit";
 import { getLocalizedString } from "@/lib/i18n";
 import { useFeedRealtime } from "@/hooks/feed/useFeedRealtime";
+import { mergeServerPostsIntoFeed } from "@/lib/gossip/realtime-feed";
 import { supabase } from "@/lib/supabase";
 import type { PlaceDetail } from "@/lib/places-api";
 import type {
@@ -80,10 +81,10 @@ export function useFeedActions({
     refreshInFlightRef.current = true;
     try {
       const { posts, pins } = await fetchGossipsFromSupabase(nickname);
-      setFeedPosts(posts);
+      setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, posts));
       setMapPins(pins);
       const withComments = await enrichPostsWithComments(posts);
-      setFeedPosts(withComments);
+      setFeedPosts((prev) => mergeServerPostsIntoFeed(prev, withComments));
     } finally {
       refreshInFlightRef.current = false;
     }

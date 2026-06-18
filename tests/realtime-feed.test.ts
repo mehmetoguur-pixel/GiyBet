@@ -57,6 +57,16 @@ describe("realtime-feed merge", () => {
     expect(merged.posts[0].gossipId).toBe("g2");
   });
 
+  it("ignores partial realtime updates without engagement fields", () => {
+    const posts = [basePost("g1", 1)];
+    posts[0].likers = ["alice"];
+    posts[0].liked = true;
+    const row = { id: "g1", room_id: "room-1" } as GossipRow;
+    const merged = mergeGossipUpdate(posts, [], row, "viewer");
+    expect(merged.posts[0].likers).toEqual(["alice"]);
+    expect(merged.posts[0].liked).toBe(true);
+  });
+
   it("appends comment without duplicates", () => {
     const posts = [basePost("g1", 1)];
     const row = {

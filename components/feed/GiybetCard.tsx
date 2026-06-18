@@ -197,10 +197,7 @@ export function GiybetCard({
         >
           <button
             type="button"
-            onClick={() => {
-              onToggleLike(post.id);
-              onShowLikers(post.id);
-            }}
+            onClick={() => onToggleLike(post.id)}
             className={`transition-all active:scale-95 ${
               post.liked
                 ? "drop-shadow-[0_0_8px_rgba(236,72,153,0.6)] hover:text-pink-300"
