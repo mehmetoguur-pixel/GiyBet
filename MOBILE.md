@@ -15,7 +15,9 @@ npm run android:apk        # Debug APK (Java/Android Studio gerekir)
 
 APK dosyası:
 
-`android\app\build\outputs\apk\debug\app-debug.apk`
+`android\app\build\outputs\apk\debug\GiyBet-v1.1.0-debug.apk`
+
+(Versiyon değişince dosya adındaki `1.1.0` da güncellenir.)
 
 Telefona kopyala → yükle → “Bilinmeyen kaynaklardan yükleme” izni ver.
 
@@ -175,7 +177,7 @@ Hata çıkarsa: **File** → **Sync Project with Gradle Files**.
 Dosya yolu:
 
 ```
-GiyBet\android\app\build\outputs\apk\debug\app-debug.apk
+GiyBet\android\app\build\outputs\apk\debug\GiyBet-v1.1.0-debug.apk
 ```
 
 Bu **debug APK**; Play Store’a yüklemek için imzalı release gerekir (Bölüm F).
@@ -189,7 +191,7 @@ cd "C:\Users\Mehmet OĞUR\Desktop\GiyBet"
 npm run android:apk
 ```
 
-Aynı `app-debug.apk` oluşur.
+Aynı `GiyBet-v*-debug.apk` oluşur.
 
 ---
 
@@ -203,14 +205,14 @@ Aynı `app-debug.apk` oluşur.
 
 ```powershell
 cd "C:\Users\Mehmet OĞUR\Desktop\GiyBet\android\app\build\outputs\apk\debug"
-adb install -r app-debug.apk
+adb install -r GiyBet-v1.1.0-debug.apk
 ```
 
 (`adb` için Android SDK Platform-Tools gerekir; genelde Android Studio ile gelir.)
 
 ### E2. Dosya ile (en kolay)
 
-1. `app-debug.apk` dosyasını WhatsApp / Google Drive / kablo ile telefona at.
+1. `GiyBet-v*-debug.apk` dosyasını WhatsApp / Google Drive / kablo ile telefona at.
 2. Dosyayı aç → **Yükle** / **Install**.
 3. “Bilinmeyen kaynak” uyarısı çıkarsa → **Bu kaynağa izin ver** → tekrar dene.
 
@@ -296,7 +298,7 @@ Gerekli materyaller: ikon (512×512), ekran görüntüleri, kısa/açıklama met
 - [ ] `.env.local` içinde `CAPACITOR_SERVER_URL` doğru
 - [ ] `npm run android:sync` hatasız bitti
 - [ ] Android Studio Gradle sync tamam
-- [ ] `app-debug.apk` oluştu
+- [ ] `GiyBet-v*-debug.apk` oluştu
 - [ ] Telefonda giriş, gıybet, harita test edildi
 
 ---

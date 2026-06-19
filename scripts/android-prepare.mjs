@@ -58,6 +58,7 @@ if (sync.status !== 0) {
 }
 
 console.log("\n✓ Sync tamam. Sonraki adımlar:");
-console.log("  npm run android:apk     → debug APK (test / arkadaşlara)");
+console.log("  npm run android:apk     → GiyBet-v*-debug.apk (test / arkadaşlara)");
 console.log("  npm run cap:android     → Android Studio aç");
-console.log("  npm run cap:run:android → emülatörde çalıştır\n");
+console.log("  npm run cap:run:android → emülatörde çalıştır");
+console.log("  APK yolu: android/app/build/outputs/apk/debug/GiyBet-v*-debug.apk\n");

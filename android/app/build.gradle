@@ -24,6 +24,15 @@ android {
     }
 }
 
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.forEach { output ->
+            def vName = variant.versionName.orNull ?: "0"
+            output.outputFileName.set("GiyBet-v${vName}-${variant.name}.apk")
+        }
+    }
+}
+
 repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
