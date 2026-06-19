@@ -11,10 +11,9 @@
     </radialGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="#08080f"/>
-  <!-- Globe: centered, slight tilt for depth — symmetric elliptical arcs -->
   <g transform="translate(256 262)">
     <circle cx="0" cy="0" r="134" fill="url(#globe-fill)"/>
-    <g fill="none" stroke="#c4b5fd" stroke-width="2" stroke-linecap="round" opacity="0.34">
+    <g fill="none" stroke="#c4b5fd" stroke-width="1.7" stroke-linecap="round" opacity="0.38">
       <circle cx="0" cy="0" r="128"/>
       <ellipse cx="0" cy="0" rx="128" ry="117"/>
       <ellipse cx="0" cy="0" rx="51" ry="128"/>
