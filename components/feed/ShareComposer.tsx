@@ -22,6 +22,7 @@ export function ShareComposer({ feed }: { feed: FeedState }) {
     geoError,
     shareLocationPreview,
     geoCoords,
+    userCity,
     nearbyVenues,
     rooms,
     selectedFeedPlace,
@@ -89,7 +90,9 @@ export function ShareComposer({ feed }: { feed: FeedState }) {
           {geoStatus === "loading"
             ? t("feed.geoLoading")
             : geoStatus === "success"
-              ? t("feed.geoSuccess")
+              ? userCity
+                ? `📍 ${userCity}`
+                : t("feed.geoSuccess")
               : t("feed.geoAdd")}
         </button>
 

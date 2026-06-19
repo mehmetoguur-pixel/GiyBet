@@ -1,17 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  formatFeedCityLabel,
-  mockDistrictForCity,
-  randomPostDistance,
-} from "@/lib/feed/format";
+import { randomPostDistance } from "@/lib/feed/format";
 import { extractHashtags } from "@/lib/feed/tags";
 import {
-  buildShareLocationFast,
   detectCityFromCoords,
   ensureCoordsForShare,
   haversineDistanceMeters,
+  resolveLocationFromGps,
 } from "@/lib/geo";
 import type { PlaceDetail } from "@/lib/places-api";
 import type {
@@ -22,6 +18,7 @@ import type {
 } from "@/lib/giybet/types";
 
 type UseShareComposerOptions = {
+  geoLanguage: string;
   t: (key: string, params?: Record<string, string>) => string;
   geoCoords: GeoCoords | null;
   setGeoCoords: (coords: GeoCoords) => void;
@@ -35,6 +32,7 @@ type UseShareComposerOptions = {
 };
 
 export function useShareComposer({
+  geoLanguage,
   t,
   geoCoords,
   setGeoCoords,
@@ -55,6 +53,7 @@ export function useShareComposer({
   const [shareImageFile, setShareImageFile] = useState<File | null>(null);
   const shareFileInputRef = useRef<HTMLInputElement>(null);
   const sharePreviewKeyRef = useRef("");
+  const previewSeqRef = useRef(0);
 
   const clearShareImage = () => {
     if (shareImagePreview) URL.revokeObjectURL(shareImagePreview);
@@ -77,20 +76,20 @@ export function useShareComposer({
       return;
     }
 
-    const previewKey = `${selectedFeedPlace?.placeId ?? ""}:${lat.toFixed(3)}:${lng.toFixed(3)}`;
+    const previewKey = `${selectedFeedPlace?.placeId ?? ""}:${lat.toFixed(4)}:${lng.toFixed(4)}`;
     if (previewKey === sharePreviewKeyRef.current) return;
     sharePreviewKeyRef.current = previewKey;
 
-    const city = detectCityFromCoords(lat, lng);
-    const loc = buildShareLocationFast(lat, lng, {
-      city,
+    const seq = ++previewSeqRef.current;
+    void resolveLocationFromGps(lat, lng, {
+      city: detectCityFromCoords(lat, lng),
       venue: selectedFeedPlace?.name,
-      manualDistrict: selectedFeedPlace
-        ? mockDistrictForCity(city, lat, lng)
-        : undefined,
+      language: geoLanguage,
+    }).then((loc) => {
+      if (seq !== previewSeqRef.current) return;
+      setShareLocationPreview(loc.locationLabel);
     });
-    setShareLocationPreview(loc.locationLabel);
-  }, [geoCoords, selectedFeedPlace]);
+  }, [geoCoords, selectedFeedPlace, geoLanguage]);
 
   const handleShareImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,18 +125,20 @@ export function useShareComposer({
 
       if (!sharePlace && shareCoords) {
         setGeoCoords(shareCoords);
-        setUserCity(
-          formatFeedCityLabel(detectCityFromCoords(shareCoords.lat, shareCoords.lng)) ?? null,
-        );
         setGeoStatus("success");
+        void resolveLocationFromGps(shareCoords.lat, shareCoords.lng, {
+          language: geoLanguage,
+        }).then((loc) => {
+          setUserCity(loc.locationLabel || loc.cityLabel);
+        });
       }
 
       const shareCity = detectCityFromCoords(shareCoords.lat, shareCoords.lng);
 
-      const shareLocation = buildShareLocationFast(shareCoords.lat, shareCoords.lng, {
+      const shareLocation = await resolveLocationFromGps(shareCoords.lat, shareCoords.lng, {
         city: shareCity,
         venue: sharePlace?.name,
-        manualDistrict: sharePlace ? mockDistrictForCity(shareCity, shareCoords.lat, shareCoords.lng) : undefined,
+        language: geoLanguage,
       });
 
       const result = await handleShareWithChat({

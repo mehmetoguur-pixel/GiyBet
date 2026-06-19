@@ -7,16 +7,18 @@ import {
   detectCityFromCoords,
   getNearbyVenues,
   requestGeolocation,
+  resolveLocationFromGps,
 } from "@/lib/geo";
 import { DEFAULT_GOSSIP_LOCATION } from "@/lib/gossip/constants";
 import type { GeoCoords, NearbyVenue } from "@/lib/giybet/types";
 
 type UseFeedGeoOptions = {
+  geoLanguage: string;
   t: (key: string) => string;
   onOpenMap?: () => void;
 };
 
-export function useFeedGeo({ t, onOpenMap }: UseFeedGeoOptions) {
+export function useFeedGeo({ geoLanguage, t, onOpenMap }: UseFeedGeoOptions) {
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [geoError, setGeoError] = useState("");
   const [geoCoords, setGeoCoords] = useState<GeoCoords | null>(null);
@@ -24,8 +26,25 @@ export function useFeedGeo({ t, onOpenMap }: UseFeedGeoOptions) {
   const [userCity, setUserCity] = useState<string | null>(null);
 
   const geoCoordsRef = useRef<GeoCoords | null>(null);
+  const geoLanguageRef = useRef(geoLanguage);
+  const geocodeSeqRef = useRef(0);
   const onOpenMapRef = useRef(onOpenMap);
   onOpenMapRef.current = onOpenMap;
+  geoLanguageRef.current = geoLanguage;
+
+  const refreshLocationLabel = useCallback((coords: GeoCoords) => {
+    const fastCity =
+      formatFeedCityLabel(detectCityFromCoords(coords.lat, coords.lng)) ?? null;
+    setUserCity(fastCity);
+
+    const seq = ++geocodeSeqRef.current;
+    void resolveLocationFromGps(coords.lat, coords.lng, { language: geoLanguageRef.current }).then(
+      (loc) => {
+        if (seq !== geocodeSeqRef.current) return;
+        setUserCity(loc.locationLabel || loc.cityLabel || fastCity);
+      },
+    );
+  }, []);
 
   const applyUserLocation = useCallback(
     (coords: GeoCoords, openMap = false, force = false) => {
@@ -36,16 +55,14 @@ export function useFeedGeo({ t, onOpenMap }: UseFeedGeoOptions) {
 
       geoCoordsRef.current = coords;
       setGeoCoords(coords);
-      const fastCity =
-        formatFeedCityLabel(detectCityFromCoords(coords.lat, coords.lng)) ?? null;
-      setUserCity(fastCity);
       setGeoStatus("success");
       setGeoError("");
       setNearbyVenues(getNearbyVenues(coords.lat, coords.lng));
+      refreshLocationLabel(coords);
       if (openMap) onOpenMapRef.current?.();
       return true;
     },
-    [],
+    [refreshLocationLabel],
   );
 
   const applyUserLocationRef = useRef(applyUserLocation);
@@ -55,7 +72,7 @@ export function useFeedGeo({ t, onOpenMap }: UseFeedGeoOptions) {
     let cancelled = false;
 
     setGeoStatus("loading");
-    requestGeolocation()
+    requestGeolocation({ highAccuracy: true, maximumAge: 0 })
       .then((coords) => {
         if (!cancelled) applyUserLocationRef.current(coords, false, true);
       })
@@ -95,7 +112,7 @@ export function useFeedGeo({ t, onOpenMap }: UseFeedGeoOptions) {
 
     setGeoStatus("loading");
     try {
-      const coords = await requestGeolocation({ highAccuracy: true });
+      const coords = await requestGeolocation({ highAccuracy: true, maximumAge: 0 });
       applyUserLocation(coords, true, true);
     } catch {
       setGeoStatus("error");

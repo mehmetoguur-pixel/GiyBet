@@ -90,6 +90,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   const handleSelectFollowingTab = useCallback(() => setFeedTab("following"), []);
 
   const geo = useFeedGeo({
+    geoLanguage: placesLanguage,
     t,
     onOpenMap: handleOpenMap,
   });
@@ -131,6 +132,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
   });
 
   const share = useShareComposer({
+    geoLanguage: placesLanguage,
     t,
     geoCoords: geo.geoCoords,
     setGeoCoords: geo.setGeoCoords,

@@ -95,7 +95,10 @@ export function getNearbyVenues(lat: number, lng: number, limit = 6): NearbyVenu
   return result;
 }
 
-export function requestGeolocation(options?: { highAccuracy?: boolean }): Promise<GeoCoords> {
+export function requestGeolocation(options?: {
+  highAccuracy?: boolean;
+  maximumAge?: number;
+}): Promise<GeoCoords> {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error("Tarayıcın konum özelliğini desteklemiyor."));
@@ -109,12 +112,37 @@ export function requestGeolocation(options?: { highAccuracy?: boolean }): Promis
         }),
       (err) => reject(err),
       {
-        enableHighAccuracy: options?.highAccuracy ?? false,
-        timeout: 12000,
-        maximumAge: 300000,
+        enableHighAccuracy: options?.highAccuracy ?? true,
+        timeout: 15000,
+        maximumAge: options?.maximumAge ?? 0,
       },
     );
   });
+}
+
+const geocodeCache = new Map<string, ShareLocationFields>();
+
+function geocodeCacheKey(lat: number, lng: number): string {
+  return `${lat.toFixed(4)},${lng.toFixed(4)}`;
+}
+
+/** GPS koordinatından gerçek adres (Nominatim / yedek API) */
+export async function resolveLocationFromGps(
+  lat: number,
+  lng: number,
+  options?: { city?: City; venue?: string; manualDistrict?: string; language?: string },
+): Promise<ShareLocationFields> {
+  const venue = options?.venue?.trim();
+  if (!venue) {
+    const cached = geocodeCache.get(geocodeCacheKey(lat, lng));
+    if (cached) return cached;
+  }
+
+  const result = await resolveShareLocationAtCoords(lat, lng, options);
+  if (!venue) {
+    geocodeCache.set(geocodeCacheKey(lat, lng), result);
+  }
+  return result;
 }
 
 /** Ağ çağrısı olmadan konum etiketi — paylaşım ve önizleme için */
@@ -198,7 +226,7 @@ export async function ensureCoordsForShare(
   }
 
   try {
-    return await requestGeolocation();
+    return await requestGeolocation({ highAccuracy: true, maximumAge: 0 });
   } catch {
     if (geoCoords) return geoCoords;
     return null;
