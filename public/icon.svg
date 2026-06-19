@@ -5,13 +5,24 @@
       <stop offset="50%" stop-color="#e879f9"/>
       <stop offset="100%" stop-color="#f9a8d4"/>
     </linearGradient>
-    <radialGradient id="halo" cx="50%" cy="52%" r="40%">
-      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.14"/>
+    <linearGradient id="globe-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9333ea" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ec4899" stop-opacity="0.35"/>
+    </linearGradient>
+    <radialGradient id="globe-fill" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.12"/>
       <stop offset="100%" stop-color="#08080f" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="512" height="512" rx="112" fill="#08080f"/>
-  <circle cx="256" cy="268" r="150" fill="url(#halo)"/>
+  <circle cx="256" cy="262" r="142" fill="url(#globe-fill)"/>
+  <g fill="none" stroke="url(#globe-stroke)" stroke-width="2.2" opacity="0.42">
+    <circle cx="256" cy="262" r="136"/>
+    <ellipse cx="256" cy="262" rx="136" ry="50"/>
+    <ellipse cx="256" cy="262" rx="50" ry="136"/>
+    <path d="M 120 262c40-52 88-78 136-78s96 26 136 78"/>
+    <path d="M 120 262c40 52 88 78 136 78s96-26 136-78"/>
+  </g>
   <text
     x="256"
     y="318"
