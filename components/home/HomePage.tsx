@@ -70,7 +70,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-full flex-col bg-[#08080f] text-zinc-100">
+    <div className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-[#08080f] text-zinc-100">
       <CapacitorShell />
       <ForgotPasswordModal
         open={auth.forgotPasswordOpen}
@@ -101,7 +101,7 @@ export default function Home() {
       />
 
       <main
-        className={`mx-auto flex w-full flex-1 flex-col px-5 pb-14 pt-10 ${auth.onFeed ? "max-w-2xl" : "max-w-md"}`}
+        className={`mx-auto flex w-full min-w-0 max-w-full flex-1 flex-col overflow-x-hidden px-4 pb-14 pt-6 sm:px-5 sm:pt-10 ${auth.onFeed ? "max-w-2xl" : "max-w-md"}`}
       >
         {feed.engagementToast && (
           <div className="mb-4 rounded-xl border border-pink-500/40 bg-pink-950/30 px-4 py-3 text-sm text-pink-200 shadow-[0_0_20px_rgba(236,72,153,0.25)]">

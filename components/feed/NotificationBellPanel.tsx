@@ -35,7 +35,7 @@ export function NotificationBellPanel({
         )}
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-2 w-72 overflow-hidden rounded-xl border border-sky-500/40 bg-[#12121a]/95 shadow-[0_0_32px_rgba(56,189,248,0.25)] backdrop-blur-md">
+        <div className="absolute right-0 top-full z-30 mt-2 w-[min(18rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-sky-500/40 bg-[#12121a]/95 shadow-[0_0_32px_rgba(56,189,248,0.25)] backdrop-blur-md">
           <div className="border-b border-sky-500/25 bg-sky-950/30 px-3 py-2">
             <p className="text-xs font-bold text-sky-200">{t("notifications.historyTitle")}</p>
             <p className="text-[10px] text-zinc-500">

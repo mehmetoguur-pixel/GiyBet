@@ -42,33 +42,34 @@ export default function GiybetFeed(props: GiybetFeedProps) {
   } = feed;
 
   return (
-    <div className="relative flex flex-col gap-5">
+    <div className="relative flex min-w-0 flex-col gap-5 overflow-x-hidden">
       <GiybetFeedModals feed={feed} />
 
-      <div className="absolute right-0 top-0 z-20 flex items-center gap-2">
-        <NotificationBellPanel
-          notifications={bellNotifications}
-          unreadCount={unreadBellCount}
-          open={showBellDropdown}
-          onToggle={handleBellToggle}
-          onSelect={handleBellNotificationSelect}
-        />
-        <button
-          type="button"
-          onClick={() => setShowProfile(true)}
-          className="rounded-full border-2 border-purple-500/50 bg-[#12121a] p-0.5 shadow-[0_0_20px_rgba(168,85,247,0.45)] transition-all hover:border-pink-400/70 hover:shadow-[0_0_28px_rgba(236,72,153,0.5)] active:scale-95"
-          aria-label={t("common.profile")}
-          title={t("common.profile")}
-        >
-          <AvatarImage config={avatar} className="h-11 w-11" />
-        </button>
-      </div>
-
-      <header className="text-center">
-        <h1 className="bg-gradient-to-r from-purple-400 via-pink-400 to-fuchsia-500 bg-clip-text text-4xl font-black tracking-tight text-transparent drop-shadow-[0_0_30px_rgba(168,85,247,0.4)]">
-          {t("common.appName")}
-        </h1>
-        <p className="mt-1 text-xs text-zinc-500">{t("feed.subtitle")}</p>
+      <header className="min-w-0">
+        <div className="mb-2 flex items-center justify-end gap-1.5">
+          <NotificationBellPanel
+            notifications={bellNotifications}
+            unreadCount={unreadBellCount}
+            open={showBellDropdown}
+            onToggle={handleBellToggle}
+            onSelect={handleBellNotificationSelect}
+          />
+          <button
+            type="button"
+            onClick={() => setShowProfile(true)}
+            className="rounded-full border-2 border-purple-500/50 bg-[#12121a] p-0.5 shadow-[0_0_20px_rgba(168,85,247,0.45)] transition-all hover:border-pink-400/70 hover:shadow-[0_0_28px_rgba(236,72,153,0.5)] active:scale-95"
+            aria-label={t("common.profile")}
+            title={t("common.profile")}
+          >
+            <AvatarImage config={avatar} className="h-10 w-10" />
+          </button>
+        </div>
+        <div className="text-center">
+          <h1 className="bg-gradient-to-r from-purple-400 via-pink-400 to-fuchsia-500 bg-clip-text text-3xl font-black tracking-tight text-transparent drop-shadow-[0_0_30px_rgba(168,85,247,0.4)] sm:text-4xl">
+            {t("common.appName")}
+          </h1>
+          <p className="mt-1 text-xs text-zinc-500">{t("feed.subtitle")}</p>
+        </div>
       </header>
 
       <ProfileBar nickname={nickname} avatar={avatar} />

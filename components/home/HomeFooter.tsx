@@ -8,7 +8,7 @@ type HomeFooterProps = {
 
 export function HomeFooter({ t }: HomeFooterProps) {
   return (
-    <footer className="sticky bottom-0 z-10 flex h-10 w-full items-center justify-between gap-2 border-t border-zinc-800/80 bg-[#0c0c14]/95 px-4 backdrop-blur-sm">
+    <footer className="sticky bottom-0 z-10 flex h-10 w-full max-w-full min-w-0 items-center justify-between gap-2 border-t border-zinc-800/80 bg-[#0c0c14]/95 px-3 backdrop-blur-sm sm:px-4">
       <div className="flex items-center gap-3 text-[10px] text-zinc-600">
         <Link href="/privacy" className="hover:text-purple-300">{t("common.legalPrivacy")}</Link>
         <Link href="/terms" className="hover:text-purple-300">{t("common.legalTerms")}</Link>

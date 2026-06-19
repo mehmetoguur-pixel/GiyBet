@@ -492,3 +492,23 @@
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
 }
+
+/* Mobil APK / WebView: yatay kaydırma ve beyaz şerit önleme */
+html {
+  overflow-x: hidden;
+  max-width: 100%;
+  background: #08080f;
+  overscroll-behavior-x: none;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+  overscroll-behavior-x: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#__next,
+main {
+  max-width: 100%;
+}
