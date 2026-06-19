@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   title: "GıyBet",
   description: "Location-based anonymous gossip — nearby whispers",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
