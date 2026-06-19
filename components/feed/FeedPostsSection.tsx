@@ -1,7 +1,6 @@
 "use client";
 
 import { GiybetCard } from "@/components/feed/GiybetCard";
-import { NearbyActiveUsers } from "@/components/feed/NearbyActiveUsers";
 import { TrendingPanel } from "@/components/feed/TrendingPanel";
 import { radarMetersToLabel } from "@/lib/feed/format";
 import type { useGiybetFeed } from "@/hooks/useGiybetFeed";
@@ -41,13 +40,6 @@ export function FeedPostsSection({ feed }: { feed: FeedState }) {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-5">
-      <NearbyActiveUsers
-        posts={feed.posts}
-        geoCoords={geoCoords}
-        currentNickname={nickname}
-        onAuthorClick={setSelectedUserProfile}
-      />
-
       <TrendingPanel
         activeTag={activeTagFilter}
         trendingTags={trendingTags}

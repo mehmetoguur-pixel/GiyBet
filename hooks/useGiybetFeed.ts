@@ -66,7 +66,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     }
   }, []);
 
-  const { blockedAuthors, blockAuthor } = useBlockedAuthors(userId);
+  const { blockedAuthors, blockAuthor, unblockAuthor } = useBlockedAuthors(userId);
   const {
     followingAuthors,
     followCounts,
@@ -156,6 +156,16 @@ export function useGiybetFeed(props: GiybetFeedProps) {
       }
       setSelectedUserProfile((prev) => (prev === trimmed ? null : prev));
       gossipChat.setGossipChatError(t("common.blockedUser"));
+      window.setTimeout(() => gossipChat.setGossipChatError(""), 2500);
+    }
+  };
+
+  const handleUnblockUser = async (author: string) => {
+    const trimmed = author.trim();
+    if (!trimmed) return;
+    const ok = await unblockAuthor(trimmed);
+    if (ok) {
+      gossipChat.setGossipChatError(t("common.unblockedUser"));
       window.setTimeout(() => gossipChat.setGossipChatError(""), 2500);
     }
   };
@@ -344,6 +354,7 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     handleShareAtSelectedPlace: map.handleShareAtSelectedPlace,
     handleOpenReport: report.handleOpenReport,
     handleBlockUser,
+    handleUnblockUser,
     handleToggleFollow,
     handleShareGossip,
     handleSubmitReport: report.handleSubmitReport,

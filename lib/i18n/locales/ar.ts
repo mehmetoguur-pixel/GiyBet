@@ -26,6 +26,8 @@ export const ar: Messages = {
     deleteGossip: "حذف النميمة",
     blockUser: "حظر",
     blockedUser: "تم حظر المستخدم.",
+    unblockUser: "إلغاء الحظر",
+    unblockedUser: "تم إلغاء الحظر.",
     followUser: "متابعة",
     unfollowUser: "إلغاء المتابعة",
     blockConfirm: "حظر @{{username}}؟ ستُخفى جميع منشوراته لديك (هذا ليس بلاغًا). متابعة؟",
@@ -274,6 +276,8 @@ export const ar: Messages = {
     securityVerification: "التحقق الأمني",
     settings: "⚙️ الإعدادات",
     settingsHint: "الإشعارات، كلمة المرور، اللغة والحساب.",
+    blockedUsersTitle: "المستخدمون المحظورون",
+    blockedUsersHint: "من حظرتهم (وليس بلاغ). ألغِ الحظر لرؤية منشوراتهم مجدداً.",
   },
   report: {
     acknowledged: "تم استلام البلاغ. المحتوى يبقى حتى يراجع المشرف هذا المنشور.",

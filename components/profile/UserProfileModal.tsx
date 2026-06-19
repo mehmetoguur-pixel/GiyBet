@@ -22,6 +22,7 @@ export function UserProfileModal({
   onClose,
   onToggleFollow,
   onBlockUser,
+  onUnblockUser,
 }: {
   username: string;
   posts: FeedPost[];
@@ -32,6 +33,7 @@ export function UserProfileModal({
   onClose: () => void;
   onToggleFollow?: (author: string) => void;
   onBlockUser?: (author: string) => void;
+  onUnblockUser?: (author: string) => void;
 }) {
   const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
@@ -139,8 +141,14 @@ export function UserProfileModal({
                     {t("common.blockUser")}
                   </button>
                 )}
-                {isBlocked && (
-                  <p className="text-xs text-orange-400">{t("common.blockedUser")}</p>
+                {isBlocked && onUnblockUser && (
+                  <button
+                    type="button"
+                    onClick={() => onUnblockUser(trimmed)}
+                    className="rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-4 py-2 text-xs font-semibold text-emerald-300 transition hover:border-emerald-400/50 active:scale-95"
+                  >
+                    {t("common.unblockUser")}
+                  </button>
                 )}
               </div>
             )}

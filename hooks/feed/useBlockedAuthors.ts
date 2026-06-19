@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { blockUsername, fetchBlockedUsernames } from "@/lib/moderation";
+import { blockUsername, fetchBlockedUsernames, unblockUsername } from "@/lib/moderation";
 
 export function useBlockedAuthors(userId: string) {
   const [blockedAuthors, setBlockedAuthors] = useState<Set<string>>(new Set());
@@ -27,5 +27,23 @@ export function useBlockedAuthors(userId: string) {
     [userId],
   );
 
-  return { blockedAuthors, blockAuthor };
+  const unblockAuthor = useCallback(
+    async (author: string) => {
+      const trimmed = author.trim();
+      if (!trimmed || !userId) return false;
+      const err = await unblockUsername(userId, trimmed);
+      if (!err) {
+        setBlockedAuthors((prev) => {
+          const next = new Set(prev);
+          next.delete(trimmed);
+          return next;
+        });
+        return true;
+      }
+      return false;
+    },
+    [userId],
+  );
+
+  return { blockedAuthors, blockAuthor, unblockAuthor };
 }

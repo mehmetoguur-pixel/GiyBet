@@ -74,6 +74,7 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
     deepLinkPost,
     setDeepLinkPost,
     handleBlockUser,
+    handleUnblockUser,
     handleToggleFollow,
   } = feed;
 
@@ -174,6 +175,8 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
         btnPrimary={btnPrimary}
         btnSecondary={btnSecondary}
         authorReactionScores={authorReactionScores}
+        blockedAuthors={blockedAuthors}
+        onUnblockUser={handleUnblockUser}
       />
       {selectedUserProfile && (
         <UserProfileModal
@@ -186,6 +189,7 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
           onClose={() => setSelectedUserProfile(null)}
           onToggleFollow={handleToggleFollow}
           onBlockUser={handleBlockUser}
+          onUnblockUser={handleUnblockUser}
         />
       )}
       {deepLinkPost && (

@@ -29,6 +29,8 @@ export function ProfilePanel({
   btnPrimary,
   btnSecondary,
   authorReactionScores,
+  blockedAuthors,
+  onUnblockUser,
 }: {
   open: boolean;
   onClose: () => void;
@@ -48,6 +50,8 @@ export function ProfilePanel({
   btnPrimary: string;
   btnSecondary: string;
   authorReactionScores?: Record<string, number>;
+  blockedAuthors?: Set<string>;
+  onUnblockUser?: (author: string) => void;
 }) {
   const { t } = useI18n();
   const [profileTab, setProfileTab] = useState<"overview" | "history" | "settings">("overview");
@@ -236,6 +240,8 @@ export function ProfilePanel({
                   <ProfileSettingsPanel
                     nickname={nickname}
                     btnPrimary={btnPrimary}
+                    blockedAuthors={blockedAuthors ?? new Set()}
+                    onUnblockUser={onUnblockUser}
                     onLogout={onLogout}
                   />
                 )}

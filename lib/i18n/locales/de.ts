@@ -26,6 +26,8 @@ export const de: Messages = {
     deleteGossip: "Klatsch löschen",
     blockUser: "Blockieren",
     blockedUser: "Nutzer blockiert.",
+    unblockUser: "Blockierung aufheben",
+    unblockedUser: "Blockierung aufgehoben.",
     followUser: "Folgen",
     unfollowUser: "Entfolgen",
     blockConfirm: "@{{username}} blockieren? Alle Beiträge werden für dich ausgeblendet (kein Meldung). Fortfahren?",
@@ -274,6 +276,8 @@ export const de: Messages = {
     securityVerification: "Sicherheitsprüfung",
     settings: "⚙️ Einstellungen",
     settingsHint: "Benachrichtigungen, Passwort, Sprache und Account.",
+    blockedUsersTitle: "Blockierte Nutzer",
+    blockedUsersHint: "Personen, die du blockiert hast (keine Meldung). Entblocken, um ihre Beiträge wieder zu sehen.",
   },
   report: {
     acknowledged: "Meldung erhalten. Inhalt bleibt sichtbar bis die Moderation diesen Beitrag prüft.",

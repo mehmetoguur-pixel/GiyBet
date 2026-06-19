@@ -16,12 +16,16 @@ import { PasswordField } from "@/components/auth/PasswordField";
 type ProfileSettingsPanelProps = {
   nickname: string;
   btnPrimary: string;
+  blockedAuthors: Set<string>;
+  onUnblockUser?: (author: string) => void;
   onLogout: () => void;
 };
 
 export function ProfileSettingsPanel({
   nickname,
   btnPrimary,
+  blockedAuthors,
+  onUnblockUser,
   onLogout,
 }: ProfileSettingsPanelProps) {
   const { t } = useI18n();
@@ -143,6 +147,30 @@ export function ProfileSettingsPanel({
       <p className="text-xs text-zinc-500">{t("profile.settingsHint")}</p>
 
       <NotificationPreferencesPanel nickname={nickname} />
+
+      {blockedAuthors.size > 0 && onUnblockUser && (
+        <div className="rounded-xl border border-orange-500/35 bg-orange-950/15 p-4">
+          <p className="text-xs font-semibold text-orange-200">{t("profile.blockedUsersTitle")}</p>
+          <p className="mt-1 text-[11px] text-zinc-500">{t("profile.blockedUsersHint")}</p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {[...blockedAuthors].sort((a, b) => a.localeCompare(b, "tr")).map((username) => (
+              <li
+                key={username}
+                className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800/80 bg-zinc-900/50 px-3 py-2"
+              >
+                <span className="truncate text-sm text-zinc-300">@{username}</span>
+                <button
+                  type="button"
+                  onClick={() => onUnblockUser(username)}
+                  className="shrink-0 rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-400/50 active:scale-95"
+                >
+                  {t("common.unblockUser")}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <button
         type="button"

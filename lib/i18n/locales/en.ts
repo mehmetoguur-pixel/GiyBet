@@ -26,6 +26,8 @@ export const en: Messages = {
     deleteGossip: "Delete gossip",
     blockUser: "Block",
     blockedUser: "User blocked.",
+    unblockUser: "Unblock",
+    unblockedUser: "User unblocked.",
     followUser: "Follow",
     unfollowUser: "Unfollow",
     blockConfirm: "Block @{{username}}? All their posts will be hidden for you (this is not a report). Continue?",
@@ -274,6 +276,8 @@ export const en: Messages = {
     securityVerification: "Security verification",
     settings: "⚙️ Settings",
     settingsHint: "Notifications, password, language, and account.",
+    blockedUsersTitle: "Blocked users",
+    blockedUsersHint: "People you blocked (not reported). Unblock to see their posts again.",
   },
   report: {
     acknowledged: "Report received. Content stays visible until moderation reviews this post.",

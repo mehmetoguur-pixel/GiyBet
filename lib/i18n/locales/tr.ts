@@ -28,6 +28,8 @@ export const tr: Messages = {
     deleteGossip: "Gıybeti sil",
     blockUser: "Engelle",
     blockedUser: "Kullanıcı engellendi.",
+    unblockUser: "Engeli kaldır",
+    unblockedUser: "Engel kaldırıldı.",
     followUser: "Takip et",
     unfollowUser: "Takibi bırak",
     blockConfirm: "@{{username}} engellenecek. Bu kişinin tüm paylaşımları sende gizlenir (şikayet değil). Emin misin?",
@@ -277,6 +279,8 @@ export const tr: Messages = {
     securityVerification: "Güvenlik Doğrulaması",
     settings: "⚙️ Ayarlar",
     settingsHint: "Bildirim, şifre, dil ve hesap ayarları.",
+    blockedUsersTitle: "Engellenen kullanıcılar",
+    blockedUsersHint: "Şikayet etmeden engellediğin kişiler. Engeli kaldırarak paylaşımlarını tekrar görebilirsin.",
   },
   report: {
     acknowledged: "Şikayet alındı. İçerik inceleme için iletildi; moderasyon onayına kadar yayında kalır.",
