@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+def giybetVersionName = "1.1.0"
+
 android {
     namespace = "com.giybet.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -8,7 +10,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 12
-        versionName "1.1.0"
+        versionName giybetVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -27,8 +29,7 @@ android {
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.forEach { output ->
-            def vName = variant.versionName.orNull ?: "0"
-            output.outputFileName.set("GiyBet-v${vName}-${variant.name}.apk")
+            output.outputFileName.set("GiyBet-v${giybetVersionName}-${variant.name}.apk")
         }
     }
 }
