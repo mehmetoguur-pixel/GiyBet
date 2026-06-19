@@ -240,6 +240,8 @@ export const de: Messages = {
     muteComment: "Kommentar-Benachrichtigungen stummschalten",
     muteReaction: "Reaktions-Benachrichtigungen stummschalten",
     muteFollow: "Follow-Benachrichtigungen stummschalten",
+    muted: "Aus",
+    active: "An",
   },
   profile: {
     title: "Mein Profil",
@@ -270,6 +272,8 @@ export const de: Messages = {
     overview: "Übersicht",
     postCountScore: "{{count}} Beiträge · Gesamt-Reaktions-Score",
     securityVerification: "Sicherheitsprüfung",
+    settings: "⚙️ Einstellungen",
+    settingsHint: "Benachrichtigungen, Passwort, Sprache und Account.",
   },
   report: {
     acknowledged: "Meldung erhalten. Inhalt bleibt sichtbar bis die Moderation diesen Beitrag prüft.",
@@ -319,6 +323,7 @@ export const de: Messages = {
     delete: "Account dauerhaft löschen",
     deleteConfirm: "Account und alle Gossips werden gelöscht. Nicht rückgängig.",
     deleteFailed: "Account konnte nicht gelöscht werden.",
+    deleting: "Wird gelöscht...",
   },
   likers: {
     title: "Likes",

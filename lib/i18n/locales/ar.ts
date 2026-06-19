@@ -240,6 +240,8 @@ export const ar: Messages = {
     muteComment: "إيقاف إشعارات التعليق",
     muteReaction: "إيقاف إشعارات التفاعل",
     muteFollow: "إيقاف إشعارات المتابعة",
+    muted: "مغلق",
+    active: "مفتوح",
   },
   profile: {
     title: "ملفي",
@@ -270,6 +272,8 @@ export const ar: Messages = {
     overview: "نظرة عامة",
     postCountScore: "{{count}} منشور · مجموع نقاط التفاعل",
     securityVerification: "التحقق الأمني",
+    settings: "⚙️ الإعدادات",
+    settingsHint: "الإشعارات، كلمة المرور، اللغة والحساب.",
   },
   report: {
     acknowledged: "تم استلام البلاغ. المحتوى يبقى حتى يراجع المشرف هذا المنشور.",
@@ -319,6 +323,7 @@ export const ar: Messages = {
     delete: "حذف الحساب نهائياً",
     deleteConfirm: "سيتم حذف حسابك ونمائمك. لا يمكن التراجع.",
     deleteFailed: "تعذّر حذف الحساب.",
+    deleting: "جاري الحذف...",
   },
   likers: {
     title: "إعجابات",

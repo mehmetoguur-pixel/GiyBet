@@ -243,6 +243,8 @@ export const tr: Messages = {
     muteComment: "Yorum bildirimlerini kapat",
     muteReaction: "Tepki bildirimlerini kapat",
     muteFollow: "Takip bildirimlerini kapat",
+    muted: "Kapalı",
+    active: "Açık",
   },
   profile: {
     title: "Profilim",
@@ -273,6 +275,8 @@ export const tr: Messages = {
     overview: "Özet",
     postCountScore: "{{count}} paylaşım · toplam reaksiyon skoru",
     securityVerification: "Güvenlik Doğrulaması",
+    settings: "⚙️ Ayarlar",
+    settingsHint: "Bildirim, şifre, dil ve hesap ayarları.",
   },
   report: {
     acknowledged: "Şikayet alındı. İçerik inceleme için iletildi; moderasyon onayına kadar yayında kalır.",
@@ -322,6 +326,7 @@ export const tr: Messages = {
     delete: "Hesabı kalıcı sil",
     deleteConfirm: "Hesabın ve tüm gıybetlerin silinecek. Bu işlem geri alınamaz. Emin misin?",
     deleteFailed: "Hesap silinemedi. Daha sonra tekrar dene.",
+    deleting: "Siliniyor...",
   },
   likers: {
     title: "Beğenenler",

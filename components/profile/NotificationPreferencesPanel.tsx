@@ -83,16 +83,27 @@ export function NotificationPreferencesPanel({ nickname }: { nickname: string })
       <ul className="mt-3 flex flex-col gap-2">
         {items.map((item) => (
           <li key={item.key}>
-            <label className="flex items-center justify-between gap-3 text-xs text-zinc-300">
+            <button
+              type="button"
+              onClick={() => toggle(item.key)}
+              disabled={saving}
+              className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left text-xs transition-all active:scale-[0.98] disabled:opacity-50 ${
+                prefs[item.key]
+                  ? "border-pink-500/45 bg-pink-950/35 text-pink-200 shadow-[0_0_12px_rgba(236,72,153,0.2)]"
+                  : "border-zinc-700/80 bg-zinc-900/50 text-zinc-300 hover:border-purple-500/35"
+              }`}
+            >
               <span>{item.label}</span>
-              <input
-                type="checkbox"
-                checked={prefs[item.key]}
-                onChange={() => toggle(item.key)}
-                disabled={saving}
-                className="h-4 w-4 rounded border-zinc-600 bg-zinc-900 accent-pink-500"
-              />
-            </label>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                  prefs[item.key]
+                    ? "bg-pink-500/30 text-pink-200"
+                    : "bg-zinc-800 text-zinc-500"
+                }`}
+              >
+                {prefs[item.key] ? t("notifications.muted") : t("notifications.active")}
+              </span>
+            </button>
           </li>
         ))}
       </ul>

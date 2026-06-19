@@ -240,6 +240,8 @@ export const en: Messages = {
     muteComment: "Mute comment notifications",
     muteReaction: "Mute reaction notifications",
     muteFollow: "Mute follow notifications",
+    muted: "Off",
+    active: "On",
   },
   profile: {
     title: "My profile",
@@ -270,6 +272,8 @@ export const en: Messages = {
     overview: "Overview",
     postCountScore: "{{count}} posts · total reaction score",
     securityVerification: "Security verification",
+    settings: "⚙️ Settings",
+    settingsHint: "Notifications, password, language, and account.",
   },
   report: {
     acknowledged: "Report received. Content stays visible until moderation reviews this post.",
@@ -319,6 +323,7 @@ export const en: Messages = {
     delete: "Delete account permanently",
     deleteConfirm: "Your account and gossips will be deleted. This cannot be undone.",
     deleteFailed: "Couldn't delete account. Try again later.",
+    deleting: "Deleting...",
   },
   likers: {
     title: "Likes",
