@@ -4,6 +4,27 @@ GıyBet bir **Next.js web uygulaması**. APK, Capacitor ile bu siteyi **native A
 
 ---
 
+## Hızlı başlangıç (3 komut)
+
+Canlı site: **https://giy-bet.vercel.app** (APK varsayılan olarak buraya bağlanır)
+
+```bash
+npm run android:prepare    # Capacitor sync + URL doğrulama
+npm run android:apk        # Debug APK (Java/Android Studio gerekir)
+```
+
+APK dosyası:
+
+`android\app\build\outputs\apk\debug\app-debug.apk`
+
+Telefona kopyala → yükle → “Bilinmeyen kaynaklardan yükleme” izni ver.
+
+**Android Studio yoksa:** `npm run cap:android` → Build → Build APK(s).
+
+**Play Store için:** imzalı release APK/AAB (Bölüm F).
+
+---
+
 ## Büyük resim
 
 ```

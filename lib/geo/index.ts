@@ -95,28 +95,55 @@ export function getNearbyVenues(lat: number, lng: number, limit = 6): NearbyVenu
   return result;
 }
 
+async function requestNativeGeolocation(options?: {
+  highAccuracy?: boolean;
+}): Promise<GeoCoords | null> {
+  if (typeof window === "undefined") return null;
+  const { Capacitor } = await import("@capacitor/core");
+  if (!Capacitor.isNativePlatform()) return null;
+
+  const { Geolocation } = await import("@capacitor/geolocation");
+  const permission = await Geolocation.checkPermissions();
+  if (permission.location === "denied") {
+    const requested = await Geolocation.requestPermissions();
+    if (requested.location === "denied") {
+      throw new Error("location_denied");
+    }
+  }
+
+  const pos = await Geolocation.getCurrentPosition({
+    enableHighAccuracy: options?.highAccuracy ?? true,
+    timeout: 15000,
+  });
+  return { lat: pos.coords.latitude, lng: pos.coords.longitude };
+}
+
 export function requestGeolocation(options?: {
   highAccuracy?: boolean;
   maximumAge?: number;
 }): Promise<GeoCoords> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error("Tarayıcın konum özelliğini desteklemiyor."));
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        resolve({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        }),
-      (err) => reject(err),
-      {
-        enableHighAccuracy: options?.highAccuracy ?? true,
-        timeout: 15000,
-        maximumAge: options?.maximumAge ?? 0,
-      },
-    );
+  return requestNativeGeolocation(options).then((nativeCoords) => {
+    if (nativeCoords) return nativeCoords;
+
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Tarayıcın konum özelliğini desteklemiyor."));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          resolve({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          }),
+        (err) => reject(err),
+        {
+          enableHighAccuracy: options?.highAccuracy ?? true,
+          timeout: 15000,
+          maximumAge: options?.maximumAge ?? 0,
+        },
+      );
+    });
   });
 }
 

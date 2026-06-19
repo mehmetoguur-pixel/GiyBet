@@ -17,6 +17,7 @@ import {
 } from "@/lib/auth-utils";
 import { saveRegisteredUser } from "@/lib/auth/profile";
 import { useI18n } from "@/lib/i18n/provider";
+import { CapacitorShell } from "@/components/mobile/CapacitorShell";
 import { useState } from "react";
 
 const GiybetFeed = dynamic(() => import("@/components/feed/GiybetFeed"), {
@@ -70,6 +71,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-full flex-col bg-[#08080f] text-zinc-100">
+      <CapacitorShell />
       <ForgotPasswordModal
         open={auth.forgotPasswordOpen}
         initialEmail={auth.contact.includes("@") ? auth.contact.trim() : ""}

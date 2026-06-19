@@ -1,5 +1,6 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 import { readFileSync } from "fs";
+import { PRODUCTION_APP_URL } from "./lib/capacitor/constants";
 
 function loadEnvLocal() {
   try {
@@ -31,7 +32,7 @@ loadEnvLocal();
  * Üretim için CAPACITOR_SERVER_URL = canlı site (ör. Vercel) adresi olmalı.
  * Yerel test: http://10.0.2.2:3000 (emülatör) veya bilgisayar IP:3000 (fiziksel cihaz)
  */
-const serverUrl = process.env.CAPACITOR_SERVER_URL?.trim();
+const serverUrl = (process.env.CAPACITOR_SERVER_URL?.trim() || PRODUCTION_APP_URL).replace(/\/$/, "");
 
 const config: CapacitorConfig = {
   appId: "com.giybet.app",
@@ -51,14 +52,11 @@ const config: CapacitorConfig = {
       backgroundColor: "#08080f",
     },
   },
-  ...(serverUrl
-    ? {
-        server: {
-          url: serverUrl,
-          cleartext: serverUrl.startsWith("http://"),
-        },
-      }
-    : {}),
+  server: {
+    url: serverUrl,
+    cleartext: serverUrl.startsWith("http://"),
+    androidScheme: "https",
+  },
 };
 
 export default config;
