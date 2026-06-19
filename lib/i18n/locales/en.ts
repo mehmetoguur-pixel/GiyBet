@@ -278,6 +278,7 @@ export const en: Messages = {
     settingsHint: "Notifications, password, language, and account.",
     blockedUsersTitle: "Blocked users",
     blockedUsersHint: "People you blocked (not reported). Unblock to see their posts again.",
+    blockedUsersEmpty: "You haven't blocked anyone yet. Blocking is separate from reporting — use ⋯ → Block on a post.",
   },
   report: {
     acknowledged: "Report received. Content stays visible until moderation reviews this post.",

@@ -278,6 +278,7 @@ export const de: Messages = {
     settingsHint: "Benachrichtigungen, Passwort, Sprache und Account.",
     blockedUsersTitle: "Blockierte Nutzer",
     blockedUsersHint: "Personen, die du blockiert hast (keine Meldung). Entblocken, um ihre Beiträge wieder zu sehen.",
+    blockedUsersEmpty: "Du hast noch niemanden blockiert. Blockieren ist keine Meldung — über ⋯ → Blockieren am Beitrag.",
   },
   report: {
     acknowledged: "Meldung erhalten. Inhalt bleibt sichtbar bis die Moderation diesen Beitrag prüft.",

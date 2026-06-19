@@ -71,6 +71,8 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
     selectedUserProfile,
     setSelectedUserProfile,
     blockedAuthors,
+    blockedAuthorsLoading,
+    refreshBlockedAuthors,
     deepLinkPost,
     setDeepLinkPost,
     handleBlockUser,
@@ -176,7 +178,9 @@ export function GiybetFeedModals({ feed }: { feed: FeedState }) {
         btnSecondary={btnSecondary}
         authorReactionScores={authorReactionScores}
         blockedAuthors={blockedAuthors}
+        blockedAuthorsLoading={blockedAuthorsLoading}
         onUnblockUser={handleUnblockUser}
+        onRefreshBlockedList={refreshBlockedAuthors}
       />
       {selectedUserProfile && (
         <UserProfileModal

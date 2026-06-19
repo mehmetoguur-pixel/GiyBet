@@ -66,7 +66,13 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     }
   }, []);
 
-  const { blockedAuthors, blockAuthor, unblockAuthor } = useBlockedAuthors(userId);
+  const {
+    blockedAuthors,
+    blockedAuthorsLoading,
+    blockAuthor,
+    unblockAuthor,
+    refreshBlockedAuthors,
+  } = useBlockedAuthors(userId);
   const {
     followingAuthors,
     followCounts,
@@ -160,14 +166,15 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     }
   };
 
-  const handleUnblockUser = async (author: string) => {
+  const handleUnblockUser = async (author: string): Promise<boolean> => {
     const trimmed = author.trim();
-    if (!trimmed) return;
+    if (!trimmed) return false;
     const ok = await unblockAuthor(trimmed);
     if (ok) {
       gossipChat.setGossipChatError(t("common.unblockedUser"));
       window.setTimeout(() => gossipChat.setGossipChatError(""), 2500);
     }
+    return ok;
   };
 
   const handleToggleFollow = async (author: string) => {
@@ -333,6 +340,8 @@ export function useGiybetFeed(props: GiybetFeedProps) {
     followingFilteredPosts,
     followingAuthors,
     blockedAuthors,
+    blockedAuthorsLoading,
+    refreshBlockedAuthors,
     followFeedback,
     hasMorePosts,
     loadMoreLoading,

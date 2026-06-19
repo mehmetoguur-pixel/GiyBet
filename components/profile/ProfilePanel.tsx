@@ -30,7 +30,9 @@ export function ProfilePanel({
   btnSecondary,
   authorReactionScores,
   blockedAuthors,
+  blockedAuthorsLoading,
   onUnblockUser,
+  onRefreshBlockedList,
 }: {
   open: boolean;
   onClose: () => void;
@@ -51,7 +53,9 @@ export function ProfilePanel({
   btnSecondary: string;
   authorReactionScores?: Record<string, number>;
   blockedAuthors?: Set<string>;
-  onUnblockUser?: (author: string) => void;
+  blockedAuthorsLoading?: boolean;
+  onUnblockUser?: (author: string) => Promise<boolean> | boolean;
+  onRefreshBlockedList?: () => void;
 }) {
   const { t } = useI18n();
   const [profileTab, setProfileTab] = useState<"overview" | "history" | "settings">("overview");
@@ -65,6 +69,12 @@ export function ProfilePanel({
       });
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && profileTab === "settings") {
+      onRefreshBlockedList?.();
+    }
+  }, [open, profileTab, onRefreshBlockedList]);
 
   if (!open) return null;
 
@@ -241,6 +251,7 @@ export function ProfilePanel({
                     nickname={nickname}
                     btnPrimary={btnPrimary}
                     blockedAuthors={blockedAuthors ?? new Set()}
+                    blockedAuthorsLoading={blockedAuthorsLoading ?? false}
                     onUnblockUser={onUnblockUser}
                     onLogout={onLogout}
                   />

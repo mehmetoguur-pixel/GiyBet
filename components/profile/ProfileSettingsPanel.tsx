@@ -17,7 +17,8 @@ type ProfileSettingsPanelProps = {
   nickname: string;
   btnPrimary: string;
   blockedAuthors: Set<string>;
-  onUnblockUser?: (author: string) => void;
+  blockedAuthorsLoading: boolean;
+  onUnblockUser?: (author: string) => Promise<boolean> | boolean;
   onLogout: () => void;
 };
 
@@ -25,6 +26,7 @@ export function ProfileSettingsPanel({
   nickname,
   btnPrimary,
   blockedAuthors,
+  blockedAuthorsLoading,
   onUnblockUser,
   onLogout,
 }: ProfileSettingsPanelProps) {
@@ -44,7 +46,9 @@ export function ProfileSettingsPanel({
   const [passwordToast, setPasswordToast] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [unblockToast, setUnblockToast] = useState<string | null>(null);
   const passwordToastTimeoutRef = useRef<number | null>(null);
+  const unblockToastTimeoutRef = useRef<number | null>(null);
 
   const resetPasswordForm = () => {
     setCurrentPassword("");
@@ -136,8 +140,28 @@ export function ProfileSettingsPanel({
       if (passwordToastTimeoutRef.current != null) {
         window.clearTimeout(passwordToastTimeoutRef.current);
       }
+      if (unblockToastTimeoutRef.current != null) {
+        window.clearTimeout(unblockToastTimeoutRef.current);
+      }
     };
   }, []);
+
+  const handleUnblock = async (username: string) => {
+    if (!onUnblockUser) return;
+    const result = await onUnblockUser(username);
+    if (result) {
+      setUnblockToast(t("common.unblockedUser"));
+      if (unblockToastTimeoutRef.current != null) {
+        window.clearTimeout(unblockToastTimeoutRef.current);
+      }
+      unblockToastTimeoutRef.current = window.setTimeout(() => {
+        setUnblockToast(null);
+        unblockToastTimeoutRef.current = null;
+      }, 2500);
+    }
+  };
+
+  const blockedList = [...blockedAuthors].sort((a, b) => a.localeCompare(b, "tr"));
 
   const sectionBtn =
     "w-full rounded-xl border px-4 py-3 text-sm font-semibold transition-all active:scale-[0.98]";
@@ -146,31 +170,39 @@ export function ProfileSettingsPanel({
     <div className="mt-4 flex flex-col gap-3">
       <p className="text-xs text-zinc-500">{t("profile.settingsHint")}</p>
 
-      <NotificationPreferencesPanel nickname={nickname} />
-
-      {blockedAuthors.size > 0 && onUnblockUser && (
-        <div className="rounded-xl border border-orange-500/35 bg-orange-950/15 p-4">
-          <p className="text-xs font-semibold text-orange-200">{t("profile.blockedUsersTitle")}</p>
-          <p className="mt-1 text-[11px] text-zinc-500">{t("profile.blockedUsersHint")}</p>
+      <div className="rounded-xl border border-orange-500/35 bg-orange-950/15 p-4">
+        <p className="text-xs font-semibold text-orange-200">{t("profile.blockedUsersTitle")}</p>
+        <p className="mt-1 text-[11px] text-zinc-500">{t("profile.blockedUsersHint")}</p>
+        {blockedAuthorsLoading ? (
+          <p className="mt-3 text-center text-xs text-zinc-500">{t("common.loading")}</p>
+        ) : blockedList.length === 0 ? (
+          <p className="mt-3 rounded-lg border border-zinc-800/80 bg-zinc-900/40 px-3 py-3 text-center text-xs text-zinc-500">
+            {t("profile.blockedUsersEmpty")}
+          </p>
+        ) : (
           <ul className="mt-3 flex flex-col gap-2">
-            {[...blockedAuthors].sort((a, b) => a.localeCompare(b, "tr")).map((username) => (
+            {blockedList.map((username) => (
               <li
                 key={username}
                 className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800/80 bg-zinc-900/50 px-3 py-2"
               >
                 <span className="truncate text-sm text-zinc-300">@{username}</span>
-                <button
-                  type="button"
-                  onClick={() => onUnblockUser(username)}
-                  className="shrink-0 rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-400/50 active:scale-95"
-                >
-                  {t("common.unblockUser")}
-                </button>
+                {onUnblockUser && (
+                  <button
+                    type="button"
+                    onClick={() => handleUnblock(username)}
+                    className="shrink-0 rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold text-emerald-300 transition hover:border-emerald-400/50 active:scale-95"
+                  >
+                    {t("common.unblockUser")}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
+
+      <NotificationPreferencesPanel nickname={nickname} />
 
       <button
         type="button"
@@ -279,6 +311,7 @@ export function ProfileSettingsPanel({
       )}
 
       {passwordToast && <NeonToast message={passwordToast} variant="success" />}
+      {unblockToast && <NeonToast message={unblockToast} variant="success" />}
     </div>
   );
 }

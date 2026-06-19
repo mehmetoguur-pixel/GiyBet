@@ -281,6 +281,7 @@ export const tr: Messages = {
     settingsHint: "Bildirim, şifre, dil ve hesap ayarları.",
     blockedUsersTitle: "Engellenen kullanıcılar",
     blockedUsersHint: "Şikayet etmeden engellediğin kişiler. Engeli kaldırarak paylaşımlarını tekrar görebilirsin.",
+    blockedUsersEmpty: "Henüz kimseyi engellemedin. Engel, şikayetten farklıdır; menüden ⋯ → Engelle ile yapılır.",
   },
   report: {
     acknowledged: "Şikayet alındı. İçerik inceleme için iletildi; moderasyon onayına kadar yayında kalır.",

@@ -5,13 +5,25 @@ import { blockUsername, fetchBlockedUsernames, unblockUsername } from "@/lib/mod
 
 export function useBlockedAuthors(userId: string) {
   const [blockedAuthors, setBlockedAuthors] = useState<Set<string>>(new Set());
+  const [blockedAuthorsLoading, setBlockedAuthorsLoading] = useState(false);
+
+  const refreshBlockedAuthors = useCallback(async () => {
+    if (!userId) {
+      setBlockedAuthors(new Set());
+      return;
+    }
+    setBlockedAuthorsLoading(true);
+    try {
+      const list = await fetchBlockedUsernames(userId);
+      setBlockedAuthors(new Set(list));
+    } finally {
+      setBlockedAuthorsLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    if (!userId) return;
-    fetchBlockedUsernames(userId).then((list) => {
-      setBlockedAuthors(new Set(list));
-    });
-  }, [userId]);
+    void refreshBlockedAuthors();
+  }, [refreshBlockedAuthors]);
 
   const blockAuthor = useCallback(
     async (author: string, nickname: string) => {
@@ -45,5 +57,11 @@ export function useBlockedAuthors(userId: string) {
     [userId],
   );
 
-  return { blockedAuthors, blockAuthor, unblockAuthor };
+  return {
+    blockedAuthors,
+    blockedAuthorsLoading,
+    blockAuthor,
+    unblockAuthor,
+    refreshBlockedAuthors,
+  };
 }
